@@ -1,0 +1,192 @@
+/* rarity.css
+   Rarity system — badge + border glow
+   Applied everywhere: inventory, market, item detail, crafting
+   Classes: .rarity-common .rarity-uncommon .rarity-rare
+            .rarity-legendary .rarity-evil .rarity-corrupted
+*/
+
+/* ══════════════════════════════════════
+   CSS VARIABLES — rarity colours
+   Referenced by both badge and glow
+══════════════════════════════════════ */
+:root {
+  --r-common:    #9ca3af;
+  --r-uncommon:  #4ade80;
+  --r-rare:      #60a5fa;
+  --r-legendary: #f5c842;
+  --r-evil:      #ef4444;
+  --r-corrupted: #7c3aed;
+
+  --r-common-glow:    rgba(156,163,175,0.22);
+  --r-uncommon-glow:  rgba(74,222,128,0.22);
+  --r-rare-glow:      rgba(96,165,250,0.28);
+  --r-legendary-glow: rgba(245,200,66,0.32);
+  --r-evil-glow:      rgba(239,68,68,0.28);
+  --r-corrupted-glow: rgba(124,58,237,0.28);
+}
+
+/* ══════════════════════════════════════
+   RARITY BADGE
+   Small pill shown on every item card
+   Usage: <div class="rarity-badge rarity-rare">◆ RARE</div>
+══════════════════════════════════════ */
+.rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: var(--f-head);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.rarity-badge.rarity-common    { color: var(--r-common);    background: rgba(156,163,175,0.1); }
+.rarity-badge.rarity-uncommon  { color: var(--r-uncommon);  background: rgba(74,222,128,0.1);  }
+.rarity-badge.rarity-rare      { color: var(--r-rare);      background: rgba(96,165,250,0.1);  }
+.rarity-badge.rarity-legendary { color: var(--r-legendary); background: rgba(245,200,66,0.1);  }
+.rarity-badge.rarity-evil      { color: var(--r-evil);      background: rgba(239,68,68,0.1);   }
+.rarity-badge.rarity-corrupted { color: var(--r-corrupted); background: rgba(124,58,237,0.1);  }
+
+/* ══════════════════════════════════════
+   RARITY BORDER GLOW
+   Applied to item cards, equip slots, bag slots
+   Usage: add class rarity-[tier] to any card element
+══════════════════════════════════════ */
+.rarity-common    { --rarity-color: var(--r-common);    --rarity-glow: var(--r-common-glow);    }
+.rarity-uncommon  { --rarity-color: var(--r-uncommon);  --rarity-glow: var(--r-uncommon-glow);  }
+.rarity-rare      { --rarity-color: var(--r-rare);      --rarity-glow: var(--r-rare-glow);      }
+.rarity-legendary { --rarity-color: var(--r-legendary); --rarity-glow: var(--r-legendary-glow); }
+.rarity-evil      { --rarity-color: var(--r-evil);      --rarity-glow: var(--r-evil-glow);      }
+.rarity-corrupted { --rarity-color: var(--r-corrupted); --rarity-glow: var(--r-corrupted-glow); }
+
+/* Card with rarity glow — add .rarity-card alongside .rarity-[tier] */
+.rarity-card {
+  border: 1px solid var(--rarity-color, rgba(255,255,255,0.08));
+  box-shadow: 0 0 14px var(--rarity-glow, transparent),
+              inset 0 0 8px var(--rarity-glow, transparent);
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.rarity-card:hover,
+.rarity-card:active {
+  box-shadow: 0 0 24px var(--rarity-glow, transparent),
+              inset 0 0 12px var(--rarity-glow, transparent);
+}
+
+/* ══════════════════════════════════════
+   RARITY LEFT STRIPE
+   Thin coloured bar on the left edge of cards
+   Usage: <div class="rarity-stripe rarity-rare"></div>
+══════════════════════════════════════ */
+.rarity-stripe {
+  position: absolute;
+  left: 0; top: 10px; bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--rarity-color, rgba(255,255,255,0.2));
+  opacity: 0.85;
+}
+
+/* ══════════════════════════════════════
+   RARITY ICON GLOW
+   Applied to item icons/images
+   Usage: <img class="rarity-icon rarity-legendary" />
+══════════════════════════════════════ */
+.rarity-icon {
+  filter: drop-shadow(0 0 6px var(--rarity-glow, transparent));
+  transition: filter 0.2s;
+}
+.rarity-icon.rarity-legendary {
+  filter: drop-shadow(0 0 10px rgba(245,200,66,0.5));
+  animation: legendaryPulse 3s ease-in-out infinite;
+}
+.rarity-icon.rarity-evil {
+  filter: drop-shadow(0 0 10px rgba(239,68,68,0.5));
+}
+.rarity-icon.rarity-corrupted {
+  filter: drop-shadow(0 0 10px rgba(124,58,237,0.5));
+  animation: corruptedFlicker 4s ease-in-out infinite;
+}
+
+@keyframes legendaryPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px  rgba(245,200,66,0.4)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(245,200,66,0.8)); }
+}
+@keyframes corruptedFlicker {
+  0%, 100% { filter: drop-shadow(0 0 8px  rgba(124,58,237,0.4)); }
+  30%       { filter: drop-shadow(0 0 14px rgba(124,58,237,0.7)); }
+  60%       { filter: drop-shadow(0 0 6px  rgba(124,58,237,0.3)); }
+  80%       { filter: drop-shadow(0 0 18px rgba(124,58,237,0.8)); }
+}
+
+/* ══════════════════════════════════════
+   ITEM DETAIL MODAL — rarity section
+   Shows inside item detail popups
+══════════════════════════════════════ */
+.item-detail-rarity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.item-detail-rarity-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--rarity-color, #9ca3af);
+  box-shadow: 0 0 6px var(--rarity-glow, transparent);
+  flex-shrink: 0;
+}
+.item-detail-rarity-label {
+  font-family: var(--f-head);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rarity-color, #9ca3af);
+}
+
+/* ══════════════════════════════════════
+   LEGENDARY SHIMMER
+   Animated shimmer across legendary item cards
+══════════════════════════════════════ */
+.rarity-card.rarity-legendary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(245,200,66,0.06) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: legendaryShimmer 3s linear infinite;
+  pointer-events: none;
+}
+@keyframes legendaryShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ══════════════════════════════════════
+   EVIL CARD PULSE
+   Subtle red pulse on evil item cards
+══════════════════════════════════════ */
+.rarity-card.rarity-evil {
+  animation: evilPulse 3s ease-in-out infinite;
+}
+@keyframes evilPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(239,68,68,0.2); }
+  50%       { box-shadow: 0 0 22px rgba(239,68,68,0.45); }
+}
+
+/* ══════════════════════════════════════
+   UTILITY — rarity text colour
+   Usage: <span class="rarity-text rarity-rare">Rare</span>
+══════════════════════════════════════ */
+.rarity-text { color: var(--rarity-color, #9ca3af); }
