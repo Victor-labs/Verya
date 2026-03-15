@@ -1,935 +1,871 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verya — Enter the Realm</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+  <title>Verya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   <style>
-    /* ═══════════════════════════════════════════
-       TOKENS
-    ═══════════════════════════════════════════ */
-    :root {
-      --gold:       #c9a84c;
-      --gold-light: #e8cc80;
-      --gold-dim:   #6b5522;
-      --ink:        #07050a;
-      --parchment:  #ede0cc;
-      --mist:       #9a8fa8;
-      --error-bg:   rgba(176,58,46,0.18);
-      --error-bd:   rgba(176,58,46,0.5);
-      --glass-bg:   rgba(8,6,14,0.55);
-      --glass-bd:   rgba(255,255,255,0.10);
-      --f-title:    'Cinzel Decorative', serif;
-      --f-head:     'Cinzel', serif;
-      --f-body:     'Crimson Text', serif;
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --gold:#c9a84c;--gold-l:#e8c96a;
+      --f-title:'Cinzel Decorative',serif;
+      --f-head:'Cinzel',serif;
+      --f-body:'Crimson Text',serif;
+    }
+    html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+
+    /* ══ SPLASH SCREEN ══ */
+    #splash{
+      position:fixed;inset:0;z-index:100;
+      background:#000;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      gap:0;
+    }
+    #splash-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+    .splash-logo-wrap{
+      position:relative;z-index:1;
+      display:flex;flex-direction:column;align-items:center;
+      margin-bottom:60px;
+    }
+    .splash-logo{
+      font-family:var(--f-title);
+      font-size:52px;font-weight:700;letter-spacing:0.08em;
+      background:linear-gradient(135deg,#1a4aff,#00c8ff,#1a4aff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      filter:drop-shadow(0 0 30px rgba(0,150,255,0.6));
+      animation:logoPulse 3s ease-in-out infinite;
+    }
+    @keyframes logoPulse{
+      0%,100%{filter:drop-shadow(0 0 20px rgba(0,150,255,0.5));}
+      50%{filter:drop-shadow(0 0 50px rgba(0,200,255,0.9));}
+    }
+    .splash-tagline{
+      font-family:var(--f-body);font-style:italic;
+      font-size:13px;letter-spacing:0.2em;
+      color:rgba(100,180,255,0.7);margin-top:6px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      width: 100%; height: 100%;
-      background: var(--ink);
-      font-family: var(--f-body);
-      color: var(--parchment);
-      overflow: hidden;
+    /* Loading bar */
+    .splash-bar-wrap{
+      position:relative;z-index:1;
+      width:220px;height:3px;
+      background:rgba(255,255,255,0.08);
+      border-radius:2px;margin-bottom:20px;
+    }
+    .splash-bar-fill{
+      height:100%;border-radius:2px;width:0%;
+      background:linear-gradient(90deg,#1a4aff,#00c8ff);
+      box-shadow:0 0 10px rgba(0,200,255,0.6);
+      transition:width 0.3s ease;
     }
 
-    /* ═══════════════════════════════════════════
-       SHARED SCREEN BASE
-    ═══════════════════════════════════════════ */
-    .screen {
-      position: fixed; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      transition: opacity 0.7s ease;
+    /* Hint text */
+    .splash-hint{
+      position:relative;z-index:1;
+      font-family:var(--f-body);font-style:italic;
+      font-size:13px;color:rgba(150,200,255,0.6);
+      text-align:center;padding:0 32px;
+      min-height:40px;
+      animation:hintFade 0.5s ease;
     }
-    .screen.hidden {
-      opacity: 0 !important;
-      pointer-events: none !important;
+    @keyframes hintFade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ══ LOGIN PAGE ══ */
+    #login-page{
+      display:none;position:fixed;inset:0;z-index:50;
+      flex-direction:column;align-items:center;justify-content:center;
+      background:radial-gradient(ellipse at 50% 20%,rgba(0,60,150,0.4),rgba(2,0,8,0.98) 70%);
+      padding:24px;
+    }
+    #login-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+    .login-logo{
+      font-family:var(--f-title);font-size:42px;font-weight:700;
+      background:linear-gradient(135deg,#1a4aff,#00c8ff,#ffffff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      margin-bottom:6px;
+      filter:drop-shadow(0 0 24px rgba(0,150,255,0.5));
+    }
+    .login-sub{
+      font-family:var(--f-body);font-style:italic;
+      font-size:13px;color:rgba(100,180,255,0.6);
+      letter-spacing:0.15em;margin-bottom:40px;
     }
 
-    /* ═══════════════════════════════════════════
-       CORNER ORNAMENTS (reused across screens)
-    ═══════════════════════════════════════════ */
-    .corner {
-      position: absolute;
-      width: 36px; height: 36px;
-      border-color: rgba(201,168,76,0.35);
-      border-style: solid;
+    .login-card{
+      width:100%;max-width:360px;
+      background:rgba(8,6,18,0.92);
+      border:1px solid rgba(0,150,255,0.15);
+      border-radius:20px;padding:28px 24px;
+      position:relative;z-index:1;
     }
-    .c-tl { top:20px; left:20px;    border-width: 1px 0 0 1px; }
-    .c-tr { top:20px; right:20px;   border-width: 1px 1px 0 0; }
-    .c-bl { bottom:20px; left:20px;  border-width: 0 0 1px 1px; }
-    .c-br { bottom:20px; right:20px; border-width: 0 1px 1px 0; }
-
-    /* ═══════════════════════════════════════════
-       SCREEN 1 — TAP TO ENTER
-    ═══════════════════════════════════════════ */
-    #screen-tap {
-      background: var(--ink);
-      gap: 48px;
-      cursor: pointer;
-      z-index: 500;
+    .login-card::before{
+      content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+      background:linear-gradient(to right,transparent,rgba(0,200,255,0.4),transparent);
     }
 
-    .tap-title {
-      font-family: var(--f-title);
-      font-size: clamp(42px, 10vw, 80px);
-      font-weight: 900;
-      letter-spacing: 0.06em;
-      background: linear-gradient(160deg, var(--gold-light) 0%, var(--gold) 50%, #8a6520 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: titlePulse 3s ease-in-out infinite;
-      text-align: center;
+    /* Tab switcher */
+    .login-tabs{
+      display:flex;gap:0;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:10px;padding:3px;margin-bottom:24px;
+    }
+    .login-tab{
+      flex:1;padding:9px;border-radius:8px;
+      font-family:var(--f-head);font-size:10px;
+      font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+      text-align:center;cursor:pointer;
+      color:rgba(255,255,255,0.4);border:none;background:transparent;
+      transition:all 0.2s;
+    }
+    .login-tab.active{
+      background:rgba(0,150,255,0.15);
+      color:rgba(100,200,255,0.9);
+      border:1px solid rgba(0,150,255,0.3);
     }
 
-    .tap-subtitle {
-      font-family: var(--f-head);
-      font-size: 11px;
-      letter-spacing: 0.45em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.5);
-      text-align: center;
+    .login-field{margin-bottom:14px;}
+    .login-label{
+      font-family:var(--f-head);font-size:9px;
+      letter-spacing:0.18em;text-transform:uppercase;
+      color:rgba(100,180,255,0.6);margin-bottom:6px;display:block;
     }
+    .login-input{
+      width:100%;padding:13px 14px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(0,150,255,0.15);border-radius:10px;
+      font-family:var(--f-body);font-size:14px;
+      color:rgba(255,255,255,0.85);outline:none;
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .login-input:focus{
+      border-color:rgba(0,150,255,0.4);
+      box-shadow:0 0 14px rgba(0,150,255,0.1);
+    }
+    .login-input::placeholder{color:rgba(255,255,255,0.2);}
 
-    /* Tap to enter button */
-    .tap-btn-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
+    .login-btn{
+      width:100%;padding:15px;margin-top:6px;
+      background:linear-gradient(105deg,rgba(0,80,200,0.9),rgba(0,160,255,0.95),rgba(0,80,200,0.9));
+      border:1px solid rgba(0,200,255,0.35);border-radius:12px;
+      font-family:var(--f-head);font-size:11px;font-weight:700;
+      letter-spacing:0.25em;text-transform:uppercase;
+      color:#001830;cursor:pointer;
+      transition:box-shadow 0.2s,transform 0.12s;
     }
+    .login-btn:active{transform:scale(0.97);}
+    .login-btn:hover{box-shadow:0 0 24px rgba(0,200,255,0.35);}
 
-    #btn-tap {
-      font-family: var(--f-head);
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.45em;
-      text-transform: uppercase;
-      color: var(--gold);
-      background: none;
-      border: 1px solid rgba(201,168,76,0.35);
-      padding: 16px 48px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-      animation: btnPulse 2.5s ease-in-out infinite;
+    .login-error{
+      font-family:var(--f-body);font-style:italic;
+      font-size:12px;color:#ef4444;
+      text-align:center;margin-top:10px;min-height:18px;
     }
-
-    #btn-tap::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: rgba(201,168,76,0.0);
-      transition: background 0.3s ease;
+    .login-divider{
+      text-align:center;margin:16px 0;
+      font-family:var(--f-head);font-size:9px;
+      letter-spacing:0.15em;color:rgba(255,255,255,0.2);
     }
-
-    #btn-tap:hover {
-      border-color: rgba(201,168,76,0.8);
-      color: var(--gold-light);
-      box-shadow: 0 0 24px rgba(201,168,76,0.25), 0 0 48px rgba(201,168,76,0.1);
+    .login-google-btn{
+      width:100%;padding:13px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.1);border-radius:12px;
+      font-family:var(--f-head);font-size:10px;
+      letter-spacing:0.15em;text-transform:uppercase;
+      color:rgba(255,255,255,0.6);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:background 0.2s;
     }
-
-    #btn-tap:hover::before { background: rgba(201,168,76,0.05); }
-
-    /* Blinking "tap anywhere" hint below the button */
-    .tap-hint {
-      font-family: var(--f-body);
-      font-style: italic;
-      font-size: 13px;
-      color: rgba(154,143,168,0.5);
-      letter-spacing: 0.08em;
-      animation: blink 2s ease-in-out infinite;
-    }
-
-    /* Horizontal divider line */
-    .tap-divider {
-      display: flex; align-items: center; gap: 16px;
-      width: clamp(200px, 40vw, 320px);
-    }
-    .tap-div-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, rgba(201,168,76,0.25), transparent); }
-    .tap-div-gem  { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); box-shadow: 0 0 6px var(--gold); flex-shrink: 0; }
-
-    /* ═══════════════════════════════════════════
-       SCREEN 2 — LOADING
-    ═══════════════════════════════════════════ */
-    #screen-loading {
-      background: var(--ink);
-      gap: 36px;
-      z-index: 400;
-      /* Hidden initially — shown after tap */
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    #screen-loading.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .load-title {
-      font-family: var(--f-title);
-      font-size: clamp(36px, 8vw, 64px);
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      background: linear-gradient(160deg, var(--gold-light) 0%, var(--gold) 50%, #8a6520 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: titlePulse 3s ease-in-out infinite;
-    }
-
-    .load-eyebrow {
-      font-family: var(--f-head);
-      font-size: 10px;
-      letter-spacing: 0.45em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.45);
-      text-align: center;
-    }
-
-    .load-bar-wrap {
-      width: clamp(260px, 55vw, 440px);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .load-bar-header {
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--f-head);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.55);
-    }
-
-    .load-track {
-      width: 100%; height: 6px;
-      background: rgba(201,168,76,0.1);
-      border: 1px solid rgba(201,168,76,0.18);
-      overflow: hidden;
-      position: relative;
-    }
-
-    #load-fill {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, #7a5c1e, var(--gold), var(--gold-light));
-      box-shadow: 0 0 14px rgba(201,168,76,0.8), 0 0 28px rgba(201,168,76,0.3);
-      position: relative;
-      transition: width 0.08s linear;
-    }
-
-    /* Shimmer on the fill bar */
-    #load-fill::after {
-      content: '';
-      position: absolute; top: 0; right: -20px;
-      width: 40px; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
-      animation: shimmer 1s ease infinite;
-    }
-
-    #load-status {
-      font-family: var(--f-head);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-      text-align: center;
-      min-height: 16px;
-    }
-
-    /* ═══════════════════════════════════════════
-       SCREEN 3 — GAME / LOGIN PAGE
-    ═══════════════════════════════════════════ */
-    #screen-game {
-      z-index: 10;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    #screen-game.active {
-      opacity: 1;
-      pointer-events: all;
-      z-index: 600; /* above loading screen when shown */
-    }
-
-    /* Background image */
-    .bg-image {
-      position: fixed; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      z-index: 0;
-      filter: brightness(0.7) saturate(0.85);
-    }
-
-    .bg-overlay {
-      position: fixed; inset: 0; z-index: 1; pointer-events: none;
-      background: linear-gradient(to bottom,
-        rgba(4,2,10,0.3) 0%,
-        rgba(4,2,10,0.15) 40%,
-        rgba(4,2,10,0.5) 100%);
-    }
-
-    /* Login card sits above image */
-    .page {
-      position: relative; z-index: 10;
-      width: 100%; height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    /* ═══════════════════════════════════════════
-       GLASS CARD
-    ═══════════════════════════════════════════ */
-    .auth-card {
-      position: relative;
-      width: 420px;
-      max-width: calc(100vw - 32px);
-      padding: 48px 40px 44px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(28px) saturate(1.6) brightness(1.1);
-      -webkit-backdrop-filter: blur(28px) saturate(1.6) brightness(1.1);
-      border: 1px solid var(--glass-bd);
-      box-shadow:
-        0 8px 32px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(255,255,255,0.04) inset,
-        0 1px 0 rgba(255,255,255,0.09) inset;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: cardAppear 0.9s cubic-bezier(.22,1,.36,1) 0.3s forwards;
-    }
-
-    /* Gold rim at top of card */
-    .auth-card::before {
-      content: '';
-      position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-      background: linear-gradient(to right, transparent, rgba(201,168,76,0.55), transparent);
-    }
-
-    /* Card corners */
-    .card-corner {
-      position: absolute; width: 18px; height: 18px;
-      border-color: rgba(201,168,76,0.45); border-style: solid;
-    }
-    .cc-tl { top:10px; left:10px;    border-width: 1px 0 0 1px; }
-    .cc-tr { top:10px; right:10px;   border-width: 1px 1px 0 0; }
-    .cc-bl { bottom:10px; left:10px;  border-width: 0 0 1px 1px; }
-    .cc-br { bottom:10px; right:10px; border-width: 0 1px 1px 0; }
-
-    /* ═══════════════════════════════════════════
-       LOGO
-    ═══════════════════════════════════════════ */
-    .logo-wrap { text-align: center; margin-bottom: 6px; }
-
-    .logo-eyebrow {
-      font-family: var(--f-head); font-size: 10px;
-      letter-spacing: 0.45em; text-transform: uppercase;
-      color: rgba(201,168,76,0.45); margin-bottom: 10px;
-    }
-
-    .logo-name {
-      display: block;
-      font-family: var(--f-title);
-      font-size: clamp(32px, 5vw, 44px);
-      font-weight: 900; line-height: 1; letter-spacing: 0.06em;
-      background: linear-gradient(160deg, var(--gold-light) 0%, var(--gold) 45%, #a07830 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      filter: drop-shadow(0 0 12px rgba(201,168,76,0.3));
-    }
-
-    .logo-tagline {
-      font-family: var(--f-body); font-style: italic;
-      font-size: 14px; color: rgba(200,188,168,0.65);
-      margin-top: 8px; letter-spacing: 0.06em;
-    }
-
-    /* ═══════════════════════════════════════════
-       DIVIDER
-    ═══════════════════════════════════════════ */
-    .divider { display: flex; align-items: center; gap: 10px; margin: 20px 0 24px; }
-    .div-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, rgba(201,168,76,0.22), transparent); }
-    .div-gem  { width: 5px; height: 5px; flex-shrink: 0; background: var(--gold); transform: rotate(45deg); box-shadow: 0 0 6px var(--gold); }
-
-    /* ═══════════════════════════════════════════
-       TABS
-    ═══════════════════════════════════════════ */
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 26px;
-    }
-    .tab-btn {
-      flex: 1; background: none; border: none;
-      font-family: var(--f-head); font-size: 11px;
-      letter-spacing: 0.3em; text-transform: uppercase;
-      color: rgba(154,143,168,0.65); padding: 11px 0 12px;
-      cursor: pointer; position: relative;
-      transition: color 0.3s ease;
-    }
-    .tab-btn::after {
-      content: ''; position: absolute;
-      bottom: -1px; left: 50%; right: 50%; height: 1px;
-      background: var(--gold); box-shadow: 0 0 8px var(--gold);
-      transition: left 0.4s cubic-bezier(.22,1,.36,1), right 0.4s cubic-bezier(.22,1,.36,1);
-    }
-    .tab-btn.active { color: var(--gold-light); }
-    .tab-btn.active::after { left: 0; right: 0; }
-    .tab-btn:not(.active):hover { color: rgba(232,204,128,0.5); }
-
-    /* ═══════════════════════════════════════════
-       PANELS
-    ═══════════════════════════════════════════ */
-    .tab-panel { display: none; flex-direction: column; gap: 14px; }
-    .tab-panel.active { display: flex; animation: panelSlide 0.3s ease forwards; }
-
-    /* ═══════════════════════════════════════════
-       FIELDS
-    ═══════════════════════════════════════════ */
-    .field-label {
-      display: block; font-family: var(--f-head);
-      font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
-      color: rgba(201,168,76,0.55); margin-bottom: 7px;
-    }
-    .field-wrap { position: relative; }
-    .field-wrap .f-ico {
-      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-      width: 15px; height: 15px; color: var(--gold);
-      opacity: 0.3; pointer-events: none; transition: opacity 0.3s ease;
-    }
-    .field-wrap:focus-within .f-ico { opacity: 0.7; }
-    .field-wrap input {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 2px; color: var(--parchment);
-      font-family: var(--f-body); font-size: 16px;
-      padding: 13px 16px 13px 40px;
-      outline: none; -webkit-appearance: none;
-      transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-    }
-    .field-wrap input::placeholder { color: rgba(154,143,168,0.45); font-style: italic; font-size: 15px; }
-    .field-wrap input:focus {
-      border-color: rgba(201,168,76,0.45);
-      background: rgba(201,168,76,0.05);
-      box-shadow: 0 0 0 3px rgba(201,168,76,0.07);
-    }
-
-    /* ═══════════════════════════════════════════
-       SUBMIT BUTTON
-    ═══════════════════════════════════════════ */
-    .btn-submit {
-      margin-top: 6px; width: 100%; padding: 15px;
-      background: linear-gradient(105deg, rgba(122,92,30,0.9) 0%, rgba(201,168,76,0.95) 45%, rgba(160,120,48,0.9) 70%, rgba(122,92,30,0.9) 100%);
-      background-size: 250% 100%; background-position: 100% 0;
-      border: 1px solid rgba(201,168,76,0.4);
-      border-radius: 2px; color: #1a0f00;
-      font-family: var(--f-head); font-size: 11.5px;
-      font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase;
-      cursor: pointer; position: relative; overflow: hidden;
-      transition: background-position 0.5s ease, box-shadow 0.3s ease, transform 0.15s ease;
-    }
-    .btn-submit:hover:not(:disabled) {
-      background-position: 0% 0;
-      box-shadow: 0 0 24px rgba(201,168,76,0.3), 0 4px 16px rgba(0,0,0,0.4);
-      transform: translateY(-1px);
-    }
-    .btn-submit:active:not(:disabled) { transform: translateY(0); }
-    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-spinner {
-      display: none; width: 13px; height: 13px;
-      border: 2px solid rgba(26,15,0,0.3); border-top-color: #1a0f00;
-      border-radius: 50%; animation: spin 0.65s linear infinite;
-      vertical-align: middle; margin-right: 8px;
-    }
-    .btn-submit.loading .btn-spinner { display: inline-block; }
-    .btn-submit.loading .btn-text    { opacity: 0.7; }
-
-    /* ═══════════════════════════════════════════
-       ERROR
-    ═══════════════════════════════════════════ */
-    .auth-error {
-      padding: 10px 14px;
-      background: var(--error-bg); border: 1px solid var(--error-bd);
-      border-radius: 2px; color: #e08888;
-      font-family: var(--f-body); font-style: italic; font-size: 14px;
-      display: none;
-    }
-    .auth-error.visible { display: block; animation: errShake 0.4s ease; }
-
-    /* ═══════════════════════════════════════════
-       FOOTER
-    ═══════════════════════════════════════════ */
-    .lore-footer {
-      text-align: center; margin-top: 24px;
-      font-family: var(--f-body); font-style: italic;
-      font-size: 12px; color: rgba(201,168,76,0.3);
-      letter-spacing: 0.05em; line-height: 1.6;
-    }
-
-    /* ═══════════════════════════════════════════
-       KEYFRAMES
-    ═══════════════════════════════════════════ */
-    @keyframes titlePulse {
-      0%,100% { filter: drop-shadow(0 0 10px rgba(201,168,76,0.2)); }
-      50%     { filter: drop-shadow(0 0 35px rgba(201,168,76,0.65)); }
-    }
-    @keyframes btnPulse {
-      0%,100% { box-shadow: 0 0 0px rgba(201,168,76,0); }
-      50%     { box-shadow: 0 0 20px rgba(201,168,76,0.2), 0 0 40px rgba(201,168,76,0.08); }
-    }
-    @keyframes blink {
-      0%,100% { opacity: 0.5; }
-      50%     { opacity: 0.15; }
-    }
-    @keyframes shimmer {
-      0%   { transform: translateX(-100%); }
-      100% { transform: translateX(300%); }
-    }
-    @keyframes cardAppear {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes panelSlide {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes errShake {
-      0%,100% { transform: translateX(0);   }
-      20%     { transform: translateX(-6px); }
-      40%     { transform: translateX(6px);  }
-      60%     { transform: translateX(-4px); }
-      80%     { transform: translateX(4px);  }
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @media (max-width: 480px) {
-      .auth-card { padding: 32px 20px 28px; }
-    }
+    .login-google-btn:active{background:rgba(255,255,255,0.1);}
   </style>
 </head>
 <body>
 
-  <!-- Music element — src also set in JS for Chrome Android compatibility -->
-  <audio id="bg-music" loop preload="auto" src="breakingdawn.mp3">
-    <source src="breakingdawn.mp3" type="audio/mpeg" />
-  </audio>
-
-  <!-- ═══════════════════════════════════════════════════
-       SCREEN 1 — TAP TO ENTER
-       This is what the user sees first.
-       Tapping it starts the music + loading bar.
-  ═══════════════════════════════════════════════════ -->
-  <div id="screen-tap" class="screen">
-    <div class="corner c-tl"></div>
-    <div class="corner c-tr"></div>
-    <div class="corner c-bl"></div>
-    <div class="corner c-br"></div>
-
-    <div class="tap-title">Verya</div>
-    <div class="tap-subtitle">&#9670; An Age of Ruin Awaits &#9670;</div>
-
-    <div class="tap-divider">
-      <div class="tap-div-line"></div>
-      <div class="tap-div-gem"></div>
-      <div class="tap-div-line"></div>
-    </div>
-
-    <div class="tap-btn-wrap">
-      <button id="btn-tap">Tap to Enter</button>
-      <span class="tap-hint">touch anywhere to begin</span>
-    </div>
+<!-- ══ SPLASH SCREEN ══ -->
+<div id="splash">
+  <canvas id="splash-canvas"></canvas>
+  <div class="splash-logo-wrap">
+    <div class="splash-logo">VERYA</div>
+    <div class="splash-tagline">The world has fallen. Will you rise?</div>
   </div>
-
-
-  <!-- ═══════════════════════════════════════════════════
-       SCREEN 2 — LOADING BAR
-       Shown after tap. 5-second XP bar fills up.
-  ═══════════════════════════════════════════════════ -->
-  <div id="screen-loading" class="screen">
-    <div class="corner c-tl"></div>
-    <div class="corner c-tr"></div>
-    <div class="corner c-bl"></div>
-    <div class="corner c-br"></div>
-
-    <div class="load-eyebrow">&#9670; Entering the Realm &#9670;</div>
-    <div class="load-title">Verya</div>
-
-    <div class="load-bar-wrap">
-      <div class="load-bar-header">
-        <span>Loading Verya...</span>
-        <span id="load-pct">0%</span>
-      </div>
-      <div class="load-track">
-        <div id="load-fill"></div>
-      </div>
-      <div id="load-status">Awakening the world...</div>
-    </div>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar-fill" id="splash-bar"></div>
   </div>
+  <div class="splash-hint" id="splash-hint">Entering the world of Verya...</div>
+</div>
 
+<!-- ══ LOGIN PAGE ══ -->
+<div id="login-page">
+  <canvas id="login-canvas"></canvas>
+  <div class="login-logo">VERYA</div>
+  <div class="login-sub">Enter the corrupted world</div>
 
-  <!-- ═══════════════════════════════════════════════════
-       SCREEN 3 — GAME / LOGIN PAGE
-       Revealed after loading completes.
-  ═══════════════════════════════════════════════════ -->
-  <div id="screen-game" class="screen">
-
-    <!-- Full screen background image -->
-    <img class="bg-image" src="blur.jpg" alt="Verya" />
-    <div class="bg-overlay"></div>
-
-    <div class="page">
-      <div class="auth-card">
-        <div class="card-corner cc-tl"></div>
-        <div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div>
-        <div class="card-corner cc-br"></div>
-
-        <!-- Logo -->
-        <div class="logo-wrap">
-          <div class="logo-eyebrow">&#9670; The Realm Awaits &#9670;</div>
-          <span class="logo-name">Verya</span>
-          <p class="logo-tagline">Who dares enter these lands?</p>
-        </div>
-
-        <!-- Divider -->
-        <div class="divider">
-          <div class="div-line"></div>
-          <div class="div-gem"></div>
-          <div class="div-line"></div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-          <button class="tab-btn active" data-tab="login">Login</button>
-          <button class="tab-btn"        data-tab="register">Register</button>
-        </div>
-
-        <!-- LOGIN PANEL -->
-        <div id="panel-login" class="tab-panel active">
-
-          <div>
-            <label class="field-label" for="login-email">Email Address</label>
-            <div class="field-wrap">
-              <svg class="f-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-              </svg>
-              <input id="login-email" type="email" placeholder="your@email.com" autocomplete="email" />
-            </div>
-          </div>
-
-          <div>
-            <label class="field-label" for="login-password">Password</label>
-            <div class="field-wrap">
-              <svg class="f-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <input id="login-password" type="password" placeholder="············" autocomplete="current-password" />
-            </div>
-          </div>
-
-          <div id="login-error" class="auth-error"></div>
-
-          <button id="btn-login" class="btn-submit">
-            <span class="btn-spinner"></span>
-            <span class="btn-text">Enter the Realm</span>
-          </button>
-        </div>
-
-        <!-- REGISTER PANEL -->
-        <div id="panel-register" class="tab-panel">
-
-          <div>
-            <label class="field-label" for="reg-name">Hero Name</label>
-            <div class="field-wrap">
-              <svg class="f-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m14.5 17.5-5-5 8-8a2.5 2.5 0 0 1 5 5Z"/>
-                <path d="m9.5 12.5-3 3-1 4 4-1 3-3"/>
-              </svg>
-              <input id="reg-name" type="text" placeholder="Choose your legend" autocomplete="username" />
-            </div>
-          </div>
-
-          <div>
-            <label class="field-label" for="reg-email">Email Address</label>
-            <div class="field-wrap">
-              <svg class="f-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-              </svg>
-              <input id="reg-email" type="email" placeholder="your@email.com" autocomplete="email" />
-            </div>
-          </div>
-
-          <div>
-            <label class="field-label" for="reg-password">Password</label>
-            <div class="field-wrap">
-              <svg class="f-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <input id="reg-password" type="password" placeholder="············" autocomplete="new-password" />
-            </div>
-          </div>
-
-          <div>
-            <label class="field-label" for="reg-confirm">Confirm Password</label>
-            <div class="field-wrap">
-              <svg class="f-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-              <input id="reg-confirm" type="password" placeholder="············" autocomplete="new-password" />
-            </div>
-          </div>
-
-          <div id="register-error" class="auth-error"></div>
-
-          <button id="btn-register" class="btn-submit">
-            <span class="btn-spinner"></span>
-            <span class="btn-text">Forge Your Legend</span>
-          </button>
-        </div>
-
-        <p class="lore-footer">&ldquo;Every hero begins with a single step into the unknown.&rdquo;</p>
-      </div>
+  <div class="login-card">
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login"    onclick="switchAuthTab('login')">Sign In</button>
+      <button class="login-tab"        id="tab-register" onclick="switchAuthTab('register')">Register</button>
     </div>
 
-  </div><!-- end screen-game -->
+    <!-- Login form -->
+    <div id="form-login">
+      <div class="login-field">
+        <label class="login-label">Email</label>
+        <input class="login-input" type="email" id="login-email" placeholder="your@email.com"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" id="login-pass" placeholder="••••••••"/>
+      </div>
+      <button class="login-btn" onclick="doLogin()">Enter Verya</button>
 
+    </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       MAIN CONTROLLER — tap → music → loading → login page
-  ═══════════════════════════════════════════════════════════ -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    <!-- Register form -->
+    <div id="form-register" style="display:none">
+      <div class="login-field">
+        <label class="login-label">Hero Name</label>
+        <input class="login-input" type="text" id="reg-name" placeholder="Choose your name..." maxlength="20"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Email</label>
+        <input class="login-input" type="email" id="reg-email" placeholder="your@email.com"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" id="reg-pass" placeholder="Min 6 characters"/>
+      </div>
+      <button class="login-btn" onclick="doRegister()">Create Hero</button>
+    </div>
 
-      var music        = document.getElementById('bg-music');
-      var screenTap    = document.getElementById('screen-tap');
-      var screenLoad   = document.getElementById('screen-loading');
-      var screenGame   = document.getElementById('screen-game');
-      var loadFill     = document.getElementById('load-fill');
-      var loadPct      = document.getElementById('load-pct');
-      var loadStatus   = document.getElementById('load-status');
+    <div class="login-error" id="auth-error"></div>
+  </div>
+</div>
 
-      music.volume = 1.0; /* MAX volume */
+<!-- Firebase + Auth -->
+<script type="module">
+  import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, signInWithEmailAndPassword,
+           createUserWithEmailAndPassword,
+           onAuthStateChanged }                     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, getDoc, setDoc }      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-      /* Status messages shown during loading */
-      var phases = [
-        { at: 0,  msg: 'Awakening the world...'      },
-        { at: 18, msg: 'Forging the realm...'         },
-        { at: 38, msg: 'Summoning ancient powers...'  },
-        { at: 58, msg: 'Binding the fallen...'        },
-        { at: 78, msg: 'Opening the gates...'         },
-        { at: 96, msg: 'Verya awaits...'              },
-      ];
+  const firebaseConfig = {
+    apiKey:"AIzaSyAVLi7FV1j-Nd5VABk0BxJxB6P8IYeLaNQ",
+    authDomain:"veryagame.firebaseapp.com",
+    projectId:"veryagame",
+    storageBucket:"veryagame.firebasestorage.app",
+    messagingSenderId:"926929873025",
+    appId:"1:926929873025:web:ab3f5f5b6b558df6f78580"
+  };
 
-      /* ── Start loading bar (called after tap) ─────────── */
-      function startLoading () {
-        var progress  = 0;
-        var interval  = 40;           /* tick every 40ms   */
-        var totalMs   = 5000;         /* 5 seconds total   */
-        var step      = 100 / (totalMs / interval);
-        var lastPhase = -1;
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
 
-        var timer = setInterval(function () {
-          progress += step;
-          if (progress >= 100) progress = 100;
+  /* ── Splash hints ── */
+  const HINTS = [
+    "💡 Complete daily missions to earn extra gold and XP.",
+    "⚔️ Time your attacks carefully — green zone means full damage.",
+    "🏚️ Start in Ashen Slums and work your way to Oblivion Citadel.",
+    "💎 Evil items can only be found by crafting or zone drops.",
+    "🏠 Own an apartment to expand your inventory vault.",
+  ];
 
-          loadFill.style.width    = progress + '%';
-          loadPct.textContent     = Math.floor(progress) + '%';
+  let hintIdx = 0;
+  let progress = 0;
+  const bar     = document.getElementById('splash-bar');
+  const hintEl  = document.getElementById('splash-hint');
 
-          /* Phase messages */
-          for (var i = phases.length - 1; i >= 0; i--) {
-            if (progress >= phases[i].at && lastPhase < i) {
-              loadStatus.textContent = phases[i].msg;
-              lastPhase = i;
-              break;
-            }
+  function nextHint() {
+    hintEl.style.animation = 'none';
+    void hintEl.offsetWidth;
+    hintEl.textContent      = HINTS[hintIdx % HINTS.length];
+    hintEl.style.animation  = 'hintFade 0.5s ease';
+    hintIdx++;
+  }
+
+  /* Animate splash bar */
+  function animateSplash(onDone) {
+    nextHint();
+    const interval = setInterval(() => {
+      progress += Math.random() * 18 + 8;
+      if (progress >= 100) { progress = 100; clearInterval(interval); onDone(); }
+      bar.style.width = Math.min(progress,100) + '%';
+      if (progress < 100 && progress % 20 < 10) nextHint();
+    }, 400);
+  }
+
+  /* Blue particle canvas */
+  function startParticles(canvasId) {
+    const cvs = document.getElementById(canvasId);
+    if (!cvs) return;
+    cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+    const ctx = cvs.getContext('2d');
+    const particles = Array.from({length:80},()=>({
+      x:Math.random()*cvs.width, y:Math.random()*cvs.height,
+      r:Math.random()*2+0.5, vx:(Math.random()-0.5)*0.4,
+      vy:(Math.random()-0.5)*0.4, a:Math.random(),
+    }));
+    let animId;
+    function draw() {
+      ctx.clearRect(0,0,cvs.width,cvs.height);
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy; p.a+=0.005;
+        if(p.x<0||p.x>cvs.width) p.vx*=-1;
+        if(p.y<0||p.y>cvs.height) p.vy*=-1;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(0,180,255,${0.3+Math.sin(p.a)*0.2})`;
+        ctx.fill();
+        /* Connection lines */
+        particles.forEach(q=>{
+          const d=Math.hypot(p.x-q.x,p.y-q.y);
+          if(d<100){
+            ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+            ctx.strokeStyle=`rgba(0,150,255,${0.06*(1-d/100)})`;
+            ctx.lineWidth=0.5; ctx.stroke();
           }
-
-          /* Complete — reveal game page */
-          if (progress >= 100) {
-            clearInterval(timer);
-            setTimeout(function () {
-              screenLoad.classList.add('hidden');
-              screenGame.classList.add('active');
-            }, 500);
-          }
-        }, interval);
-      }
-
-      /* ── TAP TO ENTER handler ──────────────────────────── */
-      var tapped = false;
-
-      function onTap (e) {
-        if (tapped) return;
-        tapped = true;
-
-        /* Remove listeners immediately */
-        document.removeEventListener('click',      onTap);
-        document.removeEventListener('touchstart', onTap);
-
-        /* Chrome Android fix:
-           1. Set src directly (not just via <source> tag)
-           2. Call load() to force the browser to fetch the file
-           3. Then play() inside the same user gesture stack      */
-        music.src = 'breakingdawn.mp3';
-        music.load();
-
-        var playPromise = music.play();
-        if (playPromise !== undefined) {
-          playPromise.then(function () {
-            /* Playing successfully */
-          }).catch(function (err) {
-            /* If still blocked, retry once on next user interaction */
-            document.addEventListener('touchstart', function retryPlay () {
-              music.play().catch(function(){});
-              document.removeEventListener('touchstart', retryPlay);
-            });
-          });
-        }
-
-        /* Transition to loading screen */
-        screenTap.classList.add('hidden');
-        screenLoad.classList.add('active');
-
-        /* Begin loading bar */
-        startLoading();
-      }
-
-      /* Listen for tap anywhere */
-      document.addEventListener('click',      onTap);
-      document.addEventListener('touchstart', onTap);
-
-      /* ── TAB SWITCHING ─────────────────────────────────── */
-      var tabBtns = document.querySelectorAll('.tab-btn');
-
-      tabBtns.forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-          /* Prevent tab click from re-triggering onTap */
-          e.stopPropagation();
-
-          var target = btn.getAttribute('data-tab');
-          tabBtns.forEach(function (b) { b.classList.remove('active'); });
-          document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
-          document.querySelectorAll('.auth-error').forEach(function (err) { err.classList.remove('visible'); });
-          btn.classList.add('active');
-          document.getElementById('panel-' + target).classList.add('active');
         });
       });
+      animId=requestAnimationFrame(draw);
+    }
+    draw();
+    return ()=>cancelAnimationFrame(animId);
+  }
 
-    });
-  </script>
+  startParticles('splash-canvas');
 
+  /* Show login page */
+  function showLogin() {
+    const splash = document.getElementById('splash');
+    splash.style.transition = 'opacity 0.8s ease';
+    splash.style.opacity = '0';
+    setTimeout(()=>{
+      splash.style.display = 'none';
+      const lp = document.getElementById('login-page');
+      lp.style.display = 'flex';
+      lp.style.animation = 'none';
+      startParticles('login-canvas');
+    },800);
+  }
 
-  <!-- ═══════════════════════════════════════════════════════════
-       FIREBASE
-  ═══════════════════════════════════════════════════════════ -->
-  <script type="module">
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  /* Auth state — if already logged in skip straight to game */
+  onAuthStateChanged(auth, user => {
+    if (user) { window.location.href = 'game.html'; }
+  });
 
-    const app = initializeApp({
-      apiKey:            "AIzaSyAVLi7FV1j-Nd5VABk0BxJxB6P8IYeLaNQ",
-      authDomain:        "veryagame.firebaseapp.com",
-      projectId:         "veryagame",
-      storageBucket:     "veryagame.firebasestorage.app",
-      messagingSenderId: "926929873025",
-      appId:             "1:926929873025:web:ab3f5f5b6b558df6f78580"
-    });
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+  animateSplash(() => setTimeout(showLogin, 400));
 
-    const showErr  = (el, msg) => { el.textContent = msg; el.classList.add('visible'); };
-    const clearErr = (el)      => el.classList.remove('visible');
-    const setLoad  = (btn, v)  => { btn.disabled = v; btn.classList.toggle('loading', v); };
+  /* ── Auth functions ── */
+  const setError = msg => { document.getElementById('auth-error').textContent = msg||''; };
 
-    const FB_ERRORS = {
-      'auth/user-not-found':      'No hero found with that email.',
-      'auth/wrong-password':      'The password you entered is incorrect.',
-      'auth/invalid-email':       'That email address is not valid.',
-      'auth/invalid-credential':  'Invalid email or password.',
-      'auth/too-many-requests':   'Too many attempts. Please wait a moment.',
-      'auth/email-already-in-use':'This email is already bound to a hero.',
-      'auth/weak-password':       'Password must be at least 6 characters.',
-    };
+  window.switchAuthTab = function(tab) {
+    document.getElementById('tab-login').classList.toggle('active', tab==='login');
+    document.getElementById('tab-register').classList.toggle('active', tab==='register');
+    document.getElementById('form-login').style.display    = tab==='login'    ? '' : 'none';
+    document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
+    setError('');
+  };
 
-    /* LOGIN */
-    document.getElementById('btn-login').addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const email = document.getElementById('login-email').value.trim();
-      const pass  = document.getElementById('login-password').value;
-      const err   = document.getElementById('login-error');
-      const btn   = document.getElementById('btn-login');
-      clearErr(err);
-      if (!email) return showErr(err, 'Please enter your email address.');
-      if (!pass)  return showErr(err, 'Please enter your password.');
-      setLoad(btn, true);
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        btn.querySelector('.btn-text').textContent = '✦ Welcome Back ✦';
-        setTimeout(() => window.location.href = 'game.html', 900);
-      } catch (e) {
-        showErr(err, FB_ERRORS[e.code] || 'Something went wrong. Try again.');
-        setLoad(btn, false);
-      }
-    });
+  window.doLogin = async function() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+    if (!email||!pass) { setError('Please fill in all fields.'); return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      setError(e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
+        ? 'Invalid email or password.' : e.message);
+    }
+  };
 
-    /* REGISTER */
-    document.getElementById('btn-register').addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const name  = document.getElementById('reg-name').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const pass  = document.getElementById('reg-password').value;
-      const conf  = document.getElementById('reg-confirm').value;
-      const err   = document.getElementById('register-error');
-      const btn   = document.getElementById('btn-register');
-      clearErr(err);
-      if (!name)           return showErr(err, 'Choose a name for your hero.');
-      if (name.length < 3) return showErr(err, 'Hero name must be at least 3 characters.');
-      if (!email)          return showErr(err, 'Please enter your email address.');
-      if (!pass)           return showErr(err, 'Please choose a password.');
-      if (pass.length < 6) return showErr(err, 'Password must be at least 6 characters.');
-      if (pass !== conf)   return showErr(err, 'Passwords do not match.');
-      setLoad(btn, true);
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, 'players', cred.user.uid), {
-          heroName: name, email,
-          level: 1, xp: 0, gold: 100,
-          hp: 100, maxHp: 100,
-          mp: 50,  maxMp: 50,
-          inventory: [],
-          createdAt: serverTimestamp(),
+  window.doRegister = async function() {
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass  = document.getElementById('reg-pass').value;
+    if (!name||!email||!pass) { setError('Please fill in all fields.'); return; }
+    if (pass.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await setDoc(doc(db,'players',cred.user.uid),{
+        heroName:name, email, level:1, xp:0, gold:500, diamonds:0,
+        hp:100, maxHp:100, mp:50, maxMp:50, energy:100,
+        stamina:100, maxStamina:100,
+        inventory:[], equipped:{}, ownedCharacters:[],
+        equippedCharacter:null, equippedAbilities:[],
+        currentZone:'ashen-slums', clearedZones:[],
+        kills:0, totalKills:0, totalBossKills:0,
+        goldEarned:0, totalEnters:0, totalScans:0,
+        alignment:null, gender:null,
+        criminalStars:0, isJailed:false, jailUntil:null,
+        pvpEnabled:false, pvpProtection:true,
+        friends:[], blockedUsers:[],
+        guildId:null, apartmentId:null, apartments:[],
+        vaultItems:[], settings:{},
+        skillTree:{ forexTrader:0, dataAnalyst:0, assailant:0, cyberElk:0, daemon:0 },
+        dailyLogin:{ lastClaim:null, currentDay:0, streak:0 },
+        createdAt: new Date().toISOString(),
+        onboardingComplete: false,
+      });
+    } catch(e) {
+      setError(e.code==='auth/email-already-in-use'
+        ? 'Email already in use.' : e.message);
+    }
+  };
+DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+  <title>Verya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --gold:#c9a84c;--gold-l:#e8c96a;
+      --f-title:'Cinzel Decorative',serif;
+      --f-head:'Cinzel',serif;
+      --f-body:'Crimson Text',serif;
+    }
+    html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+
+    /* ══ SPLASH SCREEN ══ */
+    #splash{
+      position:fixed;inset:0;z-index:100;
+      background:#000;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      gap:0;
+    }
+    #splash-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+    .splash-logo-wrap{
+      position:relative;z-index:1;
+      display:flex;flex-direction:column;align-items:center;
+      margin-bottom:60px;
+    }
+    .splash-logo{
+      font-family:var(--f-title);
+      font-size:52px;font-weight:700;letter-spacing:0.08em;
+      background:linear-gradient(135deg,#1a4aff,#00c8ff,#1a4aff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      filter:drop-shadow(0 0 30px rgba(0,150,255,0.6));
+      animation:logoPulse 3s ease-in-out infinite;
+    }
+    @keyframes logoPulse{
+      0%,100%{filter:drop-shadow(0 0 20px rgba(0,150,255,0.5));}
+      50%{filter:drop-shadow(0 0 50px rgba(0,200,255,0.9));}
+    }
+    .splash-tagline{
+      font-family:var(--f-body);font-style:italic;
+      font-size:13px;letter-spacing:0.2em;
+      color:rgba(100,180,255,0.7);margin-top:6px;
+    }
+
+    /* Loading bar */
+    .splash-bar-wrap{
+      position:relative;z-index:1;
+      width:220px;height:3px;
+      background:rgba(255,255,255,0.08);
+      border-radius:2px;margin-bottom:20px;
+    }
+    .splash-bar-fill{
+      height:100%;border-radius:2px;width:0%;
+      background:linear-gradient(90deg,#1a4aff,#00c8ff);
+      box-shadow:0 0 10px rgba(0,200,255,0.6);
+      transition:width 0.3s ease;
+    }
+
+    /* Hint text */
+    .splash-hint{
+      position:relative;z-index:1;
+      font-family:var(--f-body);font-style:italic;
+      font-size:13px;color:rgba(150,200,255,0.6);
+      text-align:center;padding:0 32px;
+      min-height:40px;
+      animation:hintFade 0.5s ease;
+    }
+    @keyframes hintFade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ══ LOGIN PAGE ══ */
+    #login-page{
+      display:none;position:fixed;inset:0;z-index:50;
+      flex-direction:column;align-items:center;justify-content:center;
+      background:radial-gradient(ellipse at 50% 20%,rgba(0,60,150,0.4),rgba(2,0,8,0.98) 70%);
+      padding:24px;
+    }
+    #login-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+    .login-logo{
+      font-family:var(--f-title);font-size:42px;font-weight:700;
+      background:linear-gradient(135deg,#1a4aff,#00c8ff,#ffffff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      margin-bottom:6px;
+      filter:drop-shadow(0 0 24px rgba(0,150,255,0.5));
+    }
+    .login-sub{
+      font-family:var(--f-body);font-style:italic;
+      font-size:13px;color:rgba(100,180,255,0.6);
+      letter-spacing:0.15em;margin-bottom:40px;
+    }
+
+    .login-card{
+      width:100%;max-width:360px;
+      background:rgba(8,6,18,0.92);
+      border:1px solid rgba(0,150,255,0.15);
+      border-radius:20px;padding:28px 24px;
+      position:relative;z-index:1;
+    }
+    .login-card::before{
+      content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+      background:linear-gradient(to right,transparent,rgba(0,200,255,0.4),transparent);
+    }
+
+    /* Tab switcher */
+    .login-tabs{
+      display:flex;gap:0;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:10px;padding:3px;margin-bottom:24px;
+    }
+    .login-tab{
+      flex:1;padding:9px;border-radius:8px;
+      font-family:var(--f-head);font-size:10px;
+      font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+      text-align:center;cursor:pointer;
+      color:rgba(255,255,255,0.4);border:none;background:transparent;
+      transition:all 0.2s;
+    }
+    .login-tab.active{
+      background:rgba(0,150,255,0.15);
+      color:rgba(100,200,255,0.9);
+      border:1px solid rgba(0,150,255,0.3);
+    }
+
+    .login-field{margin-bottom:14px;}
+    .login-label{
+      font-family:var(--f-head);font-size:9px;
+      letter-spacing:0.18em;text-transform:uppercase;
+      color:rgba(100,180,255,0.6);margin-bottom:6px;display:block;
+    }
+    .login-input{
+      width:100%;padding:13px 14px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(0,150,255,0.15);border-radius:10px;
+      font-family:var(--f-body);font-size:14px;
+      color:rgba(255,255,255,0.85);outline:none;
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .login-input:focus{
+      border-color:rgba(0,150,255,0.4);
+      box-shadow:0 0 14px rgba(0,150,255,0.1);
+    }
+    .login-input::placeholder{color:rgba(255,255,255,0.2);}
+
+    .login-btn{
+      width:100%;padding:15px;margin-top:6px;
+      background:linear-gradient(105deg,rgba(0,80,200,0.9),rgba(0,160,255,0.95),rgba(0,80,200,0.9));
+      border:1px solid rgba(0,200,255,0.35);border-radius:12px;
+      font-family:var(--f-head);font-size:11px;font-weight:700;
+      letter-spacing:0.25em;text-transform:uppercase;
+      color:#001830;cursor:pointer;
+      transition:box-shadow 0.2s,transform 0.12s;
+    }
+    .login-btn:active{transform:scale(0.97);}
+    .login-btn:hover{box-shadow:0 0 24px rgba(0,200,255,0.35);}
+
+    .login-error{
+      font-family:var(--f-body);font-style:italic;
+      font-size:12px;color:#ef4444;
+      text-align:center;margin-top:10px;min-height:18px;
+    }
+    .login-divider{
+      text-align:center;margin:16px 0;
+      font-family:var(--f-head);font-size:9px;
+      letter-spacing:0.15em;color:rgba(255,255,255,0.2);
+    }
+    .login-google-btn{
+      width:100%;padding:13px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.1);border-radius:12px;
+      font-family:var(--f-head);font-size:10px;
+      letter-spacing:0.15em;text-transform:uppercase;
+      color:rgba(255,255,255,0.6);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:background 0.2s;
+    }
+    .login-google-btn:active{background:rgba(255,255,255,0.1);}
+  </style>
+</head>
+<body>
+
+<!-- ══ SPLASH SCREEN ══ -->
+<div id="splash">
+  <canvas id="splash-canvas"></canvas>
+  <div class="splash-logo-wrap">
+    <div class="splash-logo">VERYA</div>
+    <div class="splash-tagline">The world has fallen. Will you rise?</div>
+  </div>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar-fill" id="splash-bar"></div>
+  </div>
+  <div class="splash-hint" id="splash-hint">Entering the world of Verya...</div>
+</div>
+
+<!-- ══ LOGIN PAGE ══ -->
+<div id="login-page">
+  <canvas id="login-canvas"></canvas>
+  <div class="login-logo">VERYA</div>
+  <div class="login-sub">Enter the corrupted world</div>
+
+  <div class="login-card">
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login"    onclick="switchAuthTab('login')">Sign In</button>
+      <button class="login-tab"        id="tab-register" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <!-- Login form -->
+    <div id="form-login">
+      <div class="login-field">
+        <label class="login-label">Email</label>
+        <input class="login-input" type="email" id="login-email" placeholder="your@email.com"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" id="login-pass" placeholder="••••••••"/>
+      </div>
+      <button class="login-btn" onclick="doLogin()">Enter Verya</button>
+
+    </div>
+
+    <!-- Register form -->
+    <div id="form-register" style="display:none">
+      <div class="login-field">
+        <label class="login-label">Hero Name</label>
+        <input class="login-input" type="text" id="reg-name" placeholder="Choose your name..." maxlength="20"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Email</label>
+        <input class="login-input" type="email" id="reg-email" placeholder="your@email.com"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" id="reg-pass" placeholder="Min 6 characters"/>
+      </div>
+      <button class="login-btn" onclick="doRegister()">Create Hero</button>
+    </div>
+
+    <div class="login-error" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- Firebase + Auth -->
+<script type="module">
+  import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, signInWithEmailAndPassword,
+           createUserWithEmailAndPassword,
+           onAuthStateChanged }                     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, getDoc, setDoc }      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey:"AIzaSyAVLi7FV1j-Nd5VABk0BxJxB6P8IYeLaNQ",
+    authDomain:"veryagame.firebaseapp.com",
+    projectId:"veryagame",
+    storageBucket:"veryagame.firebasestorage.app",
+    messagingSenderId:"926929873025",
+    appId:"1:926929873025:web:ab3f5f5b6b558df6f78580"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  /* ── Splash hints ── */
+  const HINTS = [
+    "💡 Complete daily missions to earn extra gold and XP.",
+    "⚔️ Time your attacks carefully — green zone means full damage.",
+    "🏚️ Start in Ashen Slums and work your way to Oblivion Citadel.",
+    "💎 Evil items can only be found by crafting or zone drops.",
+    "🏠 Own an apartment to expand your inventory vault.",
+  ];
+
+  let hintIdx = 0;
+  let progress = 0;
+  const bar     = document.getElementById('splash-bar');
+  const hintEl  = document.getElementById('splash-hint');
+
+  function nextHint() {
+    hintEl.style.animation = 'none';
+    void hintEl.offsetWidth;
+    hintEl.textContent      = HINTS[hintIdx % HINTS.length];
+    hintEl.style.animation  = 'hintFade 0.5s ease';
+    hintIdx++;
+  }
+
+  /* Animate splash bar */
+  function animateSplash(onDone) {
+    nextHint();
+    const interval = setInterval(() => {
+      progress += Math.random() * 18 + 8;
+      if (progress >= 100) { progress = 100; clearInterval(interval); onDone(); }
+      bar.style.width = Math.min(progress,100) + '%';
+      if (progress < 100 && progress % 20 < 10) nextHint();
+    }, 400);
+  }
+
+  /* Blue particle canvas */
+  function startParticles(canvasId) {
+    const cvs = document.getElementById(canvasId);
+    if (!cvs) return;
+    cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+    const ctx = cvs.getContext('2d');
+    const particles = Array.from({length:80},()=>({
+      x:Math.random()*cvs.width, y:Math.random()*cvs.height,
+      r:Math.random()*2+0.5, vx:(Math.random()-0.5)*0.4,
+      vy:(Math.random()-0.5)*0.4, a:Math.random(),
+    }));
+    let animId;
+    function draw() {
+      ctx.clearRect(0,0,cvs.width,cvs.height);
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy; p.a+=0.005;
+        if(p.x<0||p.x>cvs.width) p.vx*=-1;
+        if(p.y<0||p.y>cvs.height) p.vy*=-1;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(0,180,255,${0.3+Math.sin(p.a)*0.2})`;
+        ctx.fill();
+        /* Connection lines */
+        particles.forEach(q=>{
+          const d=Math.hypot(p.x-q.x,p.y-q.y);
+          if(d<100){
+            ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+            ctx.strokeStyle=`rgba(0,150,255,${0.06*(1-d/100)})`;
+            ctx.lineWidth=0.5; ctx.stroke();
+          }
         });
-        btn.querySelector('.btn-text').textContent = '✦ Legend Created ✦';
-        setTimeout(() => window.location.href = 'game.html', 900);
-      } catch (e) {
-        showErr(err, FB_ERRORS[e.code] || 'Could not create hero. Try again.');
-        setLoad(btn, false);
+      });
+      animId=requestAnimationFrame(draw);
+    }
+    draw();
+    return ()=>cancelAnimationFrame(animId);
+  }
+
+  startParticles('splash-canvas');
+
+  /* Show login page */
+  function showLogin() {
+    const splash = document.getElementById('splash');
+    splash.style.transition = 'opacity 0.8s ease';
+    splash.style.opacity = '0';
+    setTimeout(()=>{
+      splash.style.display = 'none';
+      const lp = document.getElementById('login-page');
+      lp.style.display = 'flex';
+      lp.style.animation = 'none';
+      startParticles('login-canvas');
+    },800);
+  }
+
+  /* Auth state — if already logged in skip straight to game */
+  onAuthStateChanged(auth, user => {
+    if (user) { window.location.href = 'game.html'; }
+  });
+
+  animateSplash(() => setTimeout(showLogin, 400));
+
+  /* ── Auth functions ── */
+  const setError = msg => { document.getElementById('auth-error').textContent = msg||''; };
+
+  window.switchAuthTab = function(tab) {
+    document.getElementById('tab-login').classList.toggle('active', tab==='login');
+    document.getElementById('tab-register').classList.toggle('active', tab==='register');
+    document.getElementById('form-login').style.display    = tab==='login'    ? '' : 'none';
+    document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
+    setError('');
+  };
+
+  window.doLogin = async function() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+    if (!email||!pass) { setError('Please fill in all fields.'); return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      setError(e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
+        ? 'Invalid email or password.' : e.message);
+    }
+  };
+
+  window.doRegister = async function() {
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass  = document.getElementById('reg-pass').value;
+    if (!name||!email||!pass) { setError('Please fill in all fields.'); return; }
+    if (pass.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await setDoc(doc(db,'players',cred.user.uid),{
+        heroName:name, email, level:1, xp:0, gold:500, diamonds:0,
+        hp:100, maxHp:100, mp:50, maxMp:50, energy:100,
+        stamina:100, maxStamina:100,
+        inventory:[], equipped:{}, ownedCharacters:[],
+        equippedCharacter:null, equippedAbilities:[],
+        currentZone:'ashen-slums', clearedZones:[],
+        kills:0, totalKills:0, totalBossKills:0,
+        goldEarned:0, totalEnters:0, totalScans:0,
+        alignment:null, gender:null,
+        criminalStars:0, isJailed:false, jailUntil:null,
+        pvpEnabled:false, pvpProtection:true,
+        friends:[], blockedUsers:[],
+        guildId:null, apartmentId:null, apartments:[],
+        vaultItems:[], settings:{},
+        skillTree:{ forexTrader:0, dataAnalyst:0, assailant:0, cyberElk:0, daemon:0 },
+        dailyLogin:{ lastClaim:null, currentDay:0, streak:0 },
+        createdAt: new Date().toISOString(),
+        onboardingComplete: false,
+      });
+    } catch(e) {
+      setError(e.code==='auth/email-already-in-use'
+        ? 'Email already in use.' : e.message);
+    }
+  };
+
+  window.doGoogle = async function() {
+    try {
+      const result = await signInWithPopup(auth, gProvider);
+      const user   = result.user;
+      const ref    = doc(db,'players',user.uid);
+      const snap   = await getDoc(ref);
+      if (!snap.exists()) {
+        await setDoc(ref,{
+          heroName:user.displayName||'Hero', email:user.email,
+          level:1, xp:0, gold:500, diamonds:0,
+          hp:100, maxHp:100, mp:50, maxMp:50, energy:100,
+          stamina:100, maxStamina:100,
+          inventory:[], equipped:{}, ownedCharacters:[],
+          equippedCharacter:null, equippedAbilities:[],
+          currentZone:'ashen-slums', clearedZones:[],
+          kills:0, totalKills:0, totalBossKills:0,
+          goldEarned:0, alignment:null, gender:null,
+          criminalStars:0, isJailed:false, jailUntil:null,
+          pvpEnabled:false, pvpProtection:true,
+          friends:[], blockedUsers:[],
+          guildId:null, apartments:[], vaultItems:[],
+          settings:{}, skillTree:{},
+          dailyLogin:{ lastClaim:null, currentDay:0, streak:0 },
+          createdAt: new Date().toISOString(),
+          onboardingComplete: false,
+        });
       }
-    });
-
-    /* Enter key */
-    document.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') return;
-      const active = document.querySelector('.tab-panel.active');
-      if (active?.id === 'panel-login') document.getElementById('btn-login').click();
-      else document.getElementById('btn-register').click();
-    });
-  </script>
-
+    } catch(e) { setError(e.message); }
+  };
+</script>
 </body>
 </html>
