@@ -245,7 +245,7 @@ function openCraftAnimation(recipe, onComplete) {
    EVENT HOOKS
 ══════════════════════════════════════ */
 document.addEventListener('page-change', e => {
-  if (e.detail.page === 'crafting') {
+  if (e.detail.page === 'craft') {
     activeCraftCat = 'all';
     renderCrafting();
   }

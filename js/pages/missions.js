@@ -122,7 +122,7 @@ setInterval(() => {
 document.addEventListener('player-ready',   () => renderMissions());
 document.addEventListener('player-updated', () => renderMissions());
 document.addEventListener('page-change', e => {
-  if (e.detail.page === 'missions') {
+  if (e.detail.page === 'quests') {
     activeMsnTab = 'daily';
     document.getElementById('msn-tab-daily').classList.add('active');
     document.getElementById('msn-tab-weekly').classList.remove('active');

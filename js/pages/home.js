@@ -1,99 +1,136 @@
 // js/pages/home.js
-// Home page — zone banner, quick action cards (Scan, Enter Realm, Explore)
-// Depends on: player.js (window.PLAYER, updatePlayerField), modal.js, map.js
+// Home page — action rows like Archlight image 2
+// Actions: Combat, Special Missions, Quests, Go to City Center, Back to Apartment
+// Live chat ticker at top (global chat latest message)
+// Current zone display with zone image
 
-import { showToast, openModal } from '../core/modal.js';
-import { ZONES, currentZone }   from '../data/zones.js';
-import { openMap }              from './map.js';
+import { goToPage }     from '../core/nav.js';
+import { showToast }    from '../core/modal.js';
+import { ZONES, getZoneById } from '../data/zones.js';
+import { db }           from '../../firebase-config.js';
+import { collection, query, orderBy,
+         limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-/* ── Scan action ── */
-document.getElementById('action-scan').addEventListener('click', () => {
-  const p = window.PLAYER; if (!p) return;
-  const zone = currentZone(p);
-  openModal({
-    emoji: '🔍', title: 'Scan for Enemies',
-    desc:  `Use your scanner to detect enemies lurking in ${zone.name}.`,
-    cost:  '⚡ -10 Energy',
-    onConfirm() {
-      if ((p.energy || 0) < 10) { showToast('⚡ Not enough energy!'); return; }
-      const enemy = zone.enemies[Math.floor(Math.random() * zone.enemies.length)];
-      window.updatePlayerField({
-        energy:     p.energy - 10,
-        totalScans: (p.totalScans || 0) + 1,
-      });
-      showToast(`🔍 Detected: ${enemy.emoji} ${enemy.name} x${Math.floor(Math.random() * 4) + 1}!`);
-    },
-  });
-});
+let tickerUnsub = null;
 
-/* ── Enter Realm action ── */
-document.getElementById('action-enter').addEventListener('click', () => {
+export function renderHome() {
   const p    = window.PLAYER; if (!p) return;
-  const zone = currentZone(p);
-  openModal({
-    emoji: '⚔️', title: 'Enter the Realm',
-    desc:  `Charge into battle in ${zone.name}. Defeat enemies to clear this zone.`,
-    cost:  '⚡ -50 Energy',
-    onConfirm() {
-      if ((p.energy || 0) < 50) { showToast('⚡ Not enough energy!'); return; }
+  const zone = getZoneById(p.currentZone || 'ashen-slums');
+  const el   = document.getElementById('page-home'); if (!el) return;
 
-      const killsGained = Math.floor(Math.random() * 3) + 1;
-      const newKills    = (p.kills || 0) + killsGained;
-      const enemy       = zone.enemies[Math.floor(Math.random() * zone.enemies.length)];
-      const goldGain    = enemy.reward * killsGained;
-      const cleared     = [...(p.clearedZones || [])];
+  el.innerHTML = `
+    <!-- Zone banner -->
+    <div class="home-zone-banner" style="background-image:url('${zone.bg}')">
+      <div class="home-zone-overlay"></div>
+      <div class="home-zone-content">
+        <div class="home-zone-label">CURRENT ZONE</div>
+        <div class="home-zone-name">${zone.emoji} ${zone.name.toUpperCase()}</div>
+        <div class="home-zone-sub">Level ${zone.levelReq}+ · ${zone.danger}</div>
+      </div>
+    </div>
 
-      const updates = {
-        energy:       p.energy - 50,
-        kills:        newKills,
-        gold:         (p.gold || 0) + goldGain,
-        totalKills:   (p.totalKills  || 0) + killsGained,
-        totalEnters:  (p.totalEnters || 0) + 1,
-        goldEarned:   (p.goldEarned  || 0) + goldGain,
-      };
+    <!-- Action rows -->
+    <div class="home-actions">
+      <div class="home-action-row" id="action-combat">
+        <div class="home-action-icon">⚔️</div>
+        <div class="home-action-text">
+          <div class="home-action-title">Combat</div>
+          <div class="home-action-sub">Fight enemies in ${zone.name}</div>
+        </div>
+        <div class="home-action-cost">⚡ 50</div>
+      </div>
 
-      /* Zone cleared when kill goal met */
-      if (newKills >= zone.enemyGoal && !cleared.includes(zone.id)) {
-        cleared.push(zone.id);
-        updates.clearedZones   = cleared;
-        updates.kills          = zone.enemyGoal;
-        updates.totalBossKills = (p.totalBossKills || 0) + 1;
-        showToast(`🏆 Zone cleared! ${zone.bosses[zone.bossGoal - 1].name} defeated! +${goldGain}🪙`);
-      } else {
-        showToast(`⚔️ ${enemy.emoji} ${enemy.name} defeated! +${goldGain}🪙 (${Math.min(newKills, zone.enemyGoal)}/${zone.enemyGoal})`);
-      }
+      <div class="home-action-row" onclick="goToPage('special-missions')">
+        <div class="home-action-icon">📋</div>
+        <div class="home-action-text">
+          <div class="home-action-title">Special Missions</div>
+          <div class="home-action-sub">NPC quests with unique rewards</div>
+        </div>
+        <div class="home-action-arrow">›</div>
+      </div>
 
-      window.updatePlayerField(updates);
+      <div class="home-actions-half">
+        <div class="home-action-row half" onclick="goToPage('quests')">
+          <div class="home-action-icon">📜</div>
+          <div class="home-action-text">
+            <div class="home-action-title">Quests</div>
+          </div>
+        </div>
+        <div class="home-action-row half" onclick="goToPage('map')">
+          <div class="home-action-icon">🗺️</div>
+          <div class="home-action-text">
+            <div class="home-action-title">World Map</div>
+          </div>
+        </div>
+      </div>
 
-      /* Update kill bar immediately without waiting for re-render */
-      const capped = Math.min(updates.kills || newKills, zone.enemyGoal);
-      const pct    = Math.min((capped / zone.enemyGoal) * 100, 100);
-      const killsEl = document.getElementById('zone-kills');
-      const fillEl  = document.getElementById('zone-progress-fill');
-      if (killsEl) killsEl.textContent  = `${capped} / ${zone.enemyGoal} enemies defeated`;
-      if (fillEl)  fillEl.style.width   = pct + '%';
-    },
+      <div class="home-action-row" onclick="goToPage('city-center')">
+        <div class="home-action-icon">🏙️</div>
+        <div class="home-action-text">
+          <div class="home-action-title">Go to City Center</div>
+          <div class="home-action-sub">Shops, market, medic, bar</div>
+        </div>
+        <div class="home-action-arrow">›</div>
+      </div>
+
+      <div class="home-action-row" id="action-apartment" onclick="goToPage('apartment')">
+        <div class="home-action-icon">🏠</div>
+        <div class="home-action-text">
+          <div class="home-action-title">
+            ${(p.apartments||[]).length ? 'Back to Apartment' : 'Rent Apartment'}
+          </div>
+          <div class="home-action-sub">
+            ${(p.apartments||[]).length
+              ? `${p.apartments[0]} apartment`
+              : 'No apartment yet'}
+          </div>
+        </div>
+        <div class="home-action-arrow">›</div>
+      </div>
+    </div>`;
+
+  /* Wire combat button */
+  document.getElementById('action-combat')?.addEventListener('click', () => {
+    const p = window.PLAYER;
+    /* HP check — below 40% block combat */
+    const hpPct = ((p.hp||100) / (p.maxHp||100)) * 100;
+    if (hpPct <= 40) {
+      showToast('❤️ HP too low! Visit Medic Center to revive first.'); return;
+    }
+    if ((p.energy||0) < 50) {
+      showToast('⚡ Not enough energy!'); return;
+    }
+    /* Open combat with random enemy from current zone */
+    const zone   = getZoneById(p.currentZone || 'ashen-slums');
+    const enemy  = zone.enemies[Math.floor(Math.random() * zone.enemies.length)];
+    window.updatePlayerField({ energy: Math.max(0, (p.energy||0) - 50), totalEnters: (p.totalEnters||0)+1 });
+    window.openCombat(zone, enemy);
   });
+
+  /* Start chat ticker */
+  startChatTicker();
+}
+
+/* ── Chat ticker ── */
+function startChatTicker() {
+  if (tickerUnsub) return;
+  const q = query(collection(db,'globalChat'), orderBy('createdAt','desc'), limit(1));
+  tickerUnsub = onSnapshot(q, snap => {
+    const tickerEl = document.getElementById('chat-ticker-inner');
+    if (!tickerEl) return;
+    if (snap.empty) { tickerEl.textContent = 'No messages yet...'; return; }
+    const m = snap.docs[0].data();
+    tickerEl.textContent = `💬 ${m.heroName||'?'}: ${m.text||''}`;
+  });
+}
+
+/* ── Event hooks ── */
+document.addEventListener('page-change',   e => { if (e.detail.page === 'home') renderHome(); });
+document.addEventListener('player-ready',  () => {
+  /* Only render home if onboarding is already complete */
+  if (window.PLAYER?.onboardingComplete) renderHome();
 });
-
-/* ── Explore opens map ── */
-document.getElementById('action-explore').addEventListener('click', () => openMap());
-
-/* ── Refresh zone banner when player loads ── */
-document.addEventListener('player-ready', e => {
-  const p = e.detail;
-  const z = ZONES.find(z => z.id === (p.currentZone || 'guild')) || ZONES[0];
-
-  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  const setW   = (id, w) => { const el = document.getElementById(id); if (el) el.style.width  = w; };
-
-  setTxt('home-zone-emoji', z.emoji);
-  setTxt('home-zone-name',  z.name);
-  setTxt('home-zone-type',  z.type);
-  setTxt('zone-boss-name',  z.bosses[z.bossGoal - 1].name);
-  setTxt('zone-boss-icon',  z.bosses[z.bossGoal - 1].emoji);
-
-  const kills = p.kills || 0;
-  setTxt('zone-kills',          `${Math.min(kills, z.enemyGoal)} / ${z.enemyGoal} enemies defeated`);
-  setW  ('zone-progress-fill',  Math.min((kills / z.enemyGoal) * 100, 100) + '%');
+document.addEventListener('player-updated',() => {
+  const pg = document.getElementById('page-home');
+  if (pg?.classList.contains('active')) renderHome();
 });

@@ -11,7 +11,7 @@ const CATS = [
   { id:'level',       label:'⭐ Level',          field:'level',        dir:'desc' },
   { id:'kills',       label:'⚔️ Total Kills',    field:'totalKills',   dir:'desc' },
   { id:'gold',        label:'🪙 Gold Earned',     field:'goldEarned',   dir:'desc' },
-  { id:'zones',       label:'🗺️ Zones Cleared',  field:'clearedZones', dir:'desc' },
+  { id:'zones',       label:'🗺️ Zones Cleared',  field:'zonesCleared', dir:'desc' },
   { id:'criminals',   label:'🔴 Top Criminals',   field:'criminalStars',dir:'desc' },
 ];
 
@@ -42,24 +42,8 @@ function fetchLeaderboard(catId) {
   const list = document.getElementById('lb-list'); if (!list) return;
   list.innerHTML = '<div class="lb-loading">Loading...</div>';
 
+  /* Unsubscribe previous listener */
   if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-
-  // FIX: Firestore cannot orderBy an array field (clearedZones).
-  // For zones category, fetch all players and sort client-side.
-  if (cat.id === 'zones') {
-    const q = query(collection(db, 'players'), limit(200));
-    unsubscribe = onSnapshot(q, snap => {
-      const players = snap.docs
-        .map(d => ({ ...d.data(), uid: d.data().uid || d.id }))
-        .sort((a, b) => (b.clearedZones||[]).length - (a.clearedZones||[]).length)
-        .slice(0, 10)
-        .map((p, i) => ({ ...p, rank: i + 1 }));
-      renderList(players, cat);
-    }, () => {
-      list.innerHTML = '<div class="lb-loading">Could not load leaderboard.</div>';
-    });
-    return;
-  }
 
   const q = query(
     collection(db, 'players'),
@@ -68,7 +52,7 @@ function fetchLeaderboard(catId) {
   );
 
   unsubscribe = onSnapshot(q, snap => {
-    const players = snap.docs.map((d, i) => ({ ...d.data(), uid: d.data().uid || d.id, rank: i + 1 }));
+    const players = snap.docs.map((d,i) => ({ ...d.data(), rank: i+1 }));
     renderList(players, cat);
   }, () => {
     list.innerHTML = '<div class="lb-loading">Could not load leaderboard.</div>';

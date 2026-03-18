@@ -241,10 +241,7 @@ document.getElementById('inv-modal-use-btn')?.addEventListener('click', () => {
 
   const updates = {};
   const effect  = def.effect || '';
-  // FIX: extract only the FIRST number from the effect string
-  // e.g. "+40 Attack +5% Lifesteal" → 40, not 405
-  const numMatch = effect.match(/\d+/);
-  const num = numMatch ? parseInt(numMatch[0]) : 10;
+  const num     = parseInt(effect.replace(/\D/g,'')) || 10;
 
   if      (effect.toLowerCase().includes('hp'))     { updates.hp     = Math.min((p.hp||100)+num, p.maxHp||100); showToast(`❤️ +${num} HP!`); }
   else if (effect.toLowerCase().includes('mp'))     { updates.mp     = Math.min((p.mp||50) +num, p.maxMp||50);  showToast(`💙 +${num} MP!`); }

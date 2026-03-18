@@ -16,38 +16,19 @@ window.searchPlayers = async function() {
   const el    = document.getElementById('social-search-results'); if (!el) return;
   el.innerHTML = '<div class="social-loading">Searching...</div>';
 
-  // FIX: heroNameLower is never set during registration — fall back to heroName prefix search
-  // Try heroNameLower first (works for players registered after this fix)
-  // then fall back to a full scan filtered client-side for legacy accounts
-  let docs = [];
-  try {
-    const q = query(
-      collection(db,'players'),
-      where('heroNameLower','>=',term),
-      where('heroNameLower','<=',term+'\uf8ff'),
-      limit(20)
-    );
-    const snap = await getDocs(q);
-    docs = snap.docs;
-  } catch(e) {
-    // index may not exist yet — silently continue with empty
-  }
+  const q = query(
+    collection(db,'players'),
+    where('heroNameLower','>=',term),
+    where('heroNameLower','<=',term+'\uf8ff'),
+    limit(20)
+  );
+  const snap = await getDocs(q);
+  const me   = window.PLAYER_UID;
 
-  // If no results from indexed query, do a broader fetch and filter client-side
-  if (!docs.length) {
-    const fallback = await getDocs(query(collection(db,'players'), limit(100)));
-    docs = fallback.docs.filter(d => {
-      const name = (d.data().heroName || '').toLowerCase();
-      return name.includes(term);
-    });
-  }
+  if (snap.empty) { el.innerHTML = '<div class="social-empty">No players found.</div>'; return; }
 
-  const me = window.PLAYER_UID;
-  const filtered = docs.filter(d => d.id !== me);
-
-  if (!filtered.length) { el.innerHTML = '<div class="social-empty">No players found.</div>'; return; }
-
-  el.innerHTML = filtered
+  el.innerHTML = snap.docs
+    .filter(d => d.id !== me)
     .map(d => {
       const p = d.data();
       const align = p.alignment === 'criminal' ? '🔴' : '🔵';

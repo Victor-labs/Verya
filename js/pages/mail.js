@@ -5,8 +5,8 @@
 
 import { db }                    from '../../firebase-config.js';
 import { collection, query, where,
-         orderBy, onSnapshot, addDoc,
-         doc, updateDoc, getDoc, limit,
+         orderBy, limit, onSnapshot, addDoc,
+         doc, updateDoc, getDoc,
          serverTimestamp, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { showToast }               from '../core/modal.js';
 

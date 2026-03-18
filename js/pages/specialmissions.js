@@ -135,8 +135,7 @@ window.alyaSell = async function() {
   const inv = [...(p?.inventory||[])];
   const idx = inv.findIndex(i => i.id === 'sword-redflame');
   if (idx < 0) { showToast('You need to forge an Evil Sword first!'); return; }
-  inv.splice(idx, 1);
-  // FIX: combine both updatePlayerField calls into one atomic write
+  inv.splice(idx,1);
   const rewInv = [...inv, { id:'sword-red', uses:1 }];
   await window.updatePlayerField({
     inventory:       rewInv,
