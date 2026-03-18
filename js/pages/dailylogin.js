@@ -28,7 +28,7 @@ export function renderDailyLogin() {
   const yinEl = document.getElementById('yin-cutout');
   if (yinEl) {
     yinEl.innerHTML = `
-      <img class="yin-img" src="assets/cityCenter/npcs/npc-yin.jpg" alt="Yin"
+      <img class="yin-img" src="assets/citycenter/npcs/npc-yin.jpg" alt="Yin"
            onerror="this.style.opacity='0.3'"/>
       <div class="yin-greeting">Welcome back 🙂‍↕️</div>`;
   }

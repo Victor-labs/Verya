@@ -217,7 +217,7 @@ function renderStudioOpen() {
   const sofieEl = document.getElementById('studio-npc');
   if (sofieEl) {
     sofieEl.innerHTML = `
-      <img class="studio-npc-img" src="assets/cityCenter/npcs/npc-studiogirl.jpg"
+      <img class="studio-npc-img" src="assets/citycenter/npcs/npc-studiogirl.jpg"
            onerror="this.style.opacity='0.3'"/>
       <div class="studio-npc-greeting">Hey there monster, what's the vibe?</div>`;
   }

@@ -146,5 +146,8 @@ document.getElementById('prf-avatar-btn').addEventListener('click', () => {
 
 /* ── Event hooks ── */
 document.addEventListener('page-change',    e => { if (e.detail.page === 'profile') renderProfile(); });
-document.addEventListener('player-ready',   () => renderProfile());
-document.addEventListener('player-updated', () => renderProfile());
+document.addEventListener('player-ready',   () => { /* Profile renders when page-change fires */ });
+document.addEventListener('player-updated', () => {
+  const pg = document.getElementById('page-profile');
+  if (pg?.classList.contains('active')) renderProfile();
+});

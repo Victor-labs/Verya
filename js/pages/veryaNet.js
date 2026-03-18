@@ -19,10 +19,10 @@ let activeSection = null;
 export function renderVeryaNet() {
   const el = document.getElementById('vnet-hub'); if (!el) return;
   const sections = [
-    { id:'wiki',    name:'Verya Wiki',    img:'assets/veryaNet/verya-wiki.jpg',    desc:'Everything you need to know about Verya.' },
-    { id:'news',    name:'Verya News',    img:'assets/veryaNet/verya-news.jpg',    desc:'Official announcements and updates.' },
-    { id:'stock',   name:'VeryaForex',    img:'assets/veryaNet/stock-market.jpg',  desc:'Trade coins, buy diamonds and rare vouchers.' },
-    { id:'realestate', name:'Real Estate',img:'assets/veryaNet/real-estate.jpg',   desc:'Browse and rent apartments across Verya.' },
+    { id:'wiki',    name:'Verya Wiki',    img:'assets/veryanet/verya-wiki.jpg',    desc:'Everything you need to know about Verya.' },
+    { id:'news',    name:'Verya News',    img:'assets/veryanet/verya-news.jpg',    desc:'Official announcements and updates.' },
+    { id:'stock',   name:'VeryaForex',    img:'assets/veryanet/stock-market.jpg',  desc:'Trade coins, buy diamonds and rare vouchers.' },
+    { id:'realestate', name:'Real Estate',img:'assets/veryanet/real-estate.jpg',   desc:'Browse and rent apartments across Verya.' },
   ];
 
   el.innerHTML = sections.map(s =>
