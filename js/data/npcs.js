@@ -6,7 +6,7 @@ export const NPCS = {
 
   /* ── CITY CENTER ── */
   victor: {
-    id:'victor', name:'Victor', img:'assets/cityCenter/npcs/npc-victor.jpg',
+    id:'victor', name:'Victor', img:'assets/citycenter/npcs/npc-victor.jpg',
     greeting: "I don't do much talk, what can I offer you?",
     options: [
       { id:'request', label:'Complete Victor request', action:'quest' },
@@ -15,7 +15,7 @@ export const NPCS = {
     ],
   },
   gabon: {
-    id:'gabon', name:'Gabon', img:'assets/cityCenter/npcs/npc-gabon.jpg',
+    id:'gabon', name:'Gabon', img:'assets/citycenter/npcs/npc-gabon.jpg',
     greeting: "Hmmh you sure wanna play this game?",
     options: [
       { id:'play',    label:'Play Pachinko',           action:'pachinko' },
@@ -26,7 +26,7 @@ export const NPCS = {
 
   /* ── SPECIAL MISSION NPCs ── */
   seraphina: {
-    id:'seraphina', name:'Seraphina', img:'assets/cityCenter/npcs/npc-seraphina.jpg',
+    id:'seraphina', name:'Seraphina', img:'assets/citycenter/npcs/npc-seraphina.jpg',
     levelReq: 2,
     greeting: "My brother was attacked last week downtown. Help me avenge him.",
     options: [{ id:'quest', label:'See Mission', action:'quest' }],
@@ -38,7 +38,7 @@ export const NPCS = {
     },
   },
   presido: {
-    id:'presido', name:'Presido', img:'assets/cityCenter/npcs/npc-presido.jpg',
+    id:'presido', name:'Presido', img:'assets/citycenter/npcs/npc-presido.jpg',
     levelReq: 12,
     greeting: "Sigh... I'm still stuck looking for someone to complete my evil conquest.",
     options:[{ id:'quest', label:'See Mission', action:'quest' }],
@@ -53,7 +53,7 @@ export const NPCS = {
     },
   },
   daemon_npc: {
-    id:'daemon_npc', name:'Daemon', img:'assets/cityCenter/npcs/npc-daemon.jpg',
+    id:'daemon_npc', name:'Daemon', img:'assets/citycenter/npcs/npc-daemon.jpg',
     levelReq: 15,
     greeting: "Hehe haha, a criminal encountered luck today!",
     options:[{ id:'quest', label:'See Mission', action:'quest' }],
@@ -71,7 +71,7 @@ export const NPCS = {
     },
   },
   gabon_npc: {
-    id:'gabon_npc', name:'Gabon', img:'assets/cityCenter/npcs/npc-gabon.jpg',
+    id:'gabon_npc', name:'Gabon', img:'assets/citycenter/npcs/npc-gabon.jpg',
     levelReq: 10,
     greeting: "Hey there, from the bar right? Ok — if you complete my quests you earn a Pachinko token, how about that?",
     options:[
@@ -93,7 +93,7 @@ export const NPCS = {
     },
   },
   david: {
-    id:'david', name:'David', img:'assets/cityCenter/npcs/npc-david.jpg',
+    id:'david', name:'David', img:'assets/citycenter/npcs/npc-david.jpg',
     levelReq: 0,
     greeting: "Hello newbie, welcome to Verya. Let's get you started.",
     options:[
@@ -160,7 +160,7 @@ export const NPCS = {
     ],
   },
   alya: {
-    id:'alya', name:'Alya', img:'assets/cityCenter/npcs/npc-alya.jpg',
+    id:'alya', name:'Alya', img:'assets/citycenter/npcs/npc-alya.jpg',
     levelReq: 20,
     greeting: "Hey adventurer, wanna help me out?",
     options:[
@@ -186,7 +186,7 @@ export const NPCS = {
     },
   },
   yin: {
-    id:'yin', name:'Yin', img:'assets/cityCenter/npcs/npc-yin.jpg',
+    id:'yin', name:'Yin', img:'assets/citycenter/npcs/npc-yin.jpg',
     greeting: "Welcome back 🙂‍↕️",
   },
 };
