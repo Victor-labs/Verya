@@ -1,53 +1,67 @@
 // js/core/audio.js
-// Background music controller
-// - Loops fallenverya.mp3
-// - Reads music toggle from player settings
-// - Listens to settings-changed event for instant on/off
-// - Auto-starts on first user interaction (browser autoplay policy)
+// Three audio tracks:
+// - breakingdawn.mp3  → splash + login (handled in index.html)
+// - fallenverya.mp3   → in-game background music
+// - chat.mp3          → plays inside global chat
+// Reads music toggle from settings
+// Stops/starts on settings-changed event
 
-const BGM_SRC = 'assets/audio/fallenverya.mp3';
+const BGM_SRC  = 'assets/audio/fallenverya.mp3';
+const CHAT_SRC = 'assets/audio/chat.mp3';
 
-/* Create audio element once */
-const bgm       = new Audio(BGM_SRC);
-bgm.loop        = true;
-bgm.volume      = 0.4;
-bgm.preload     = 'auto';
+let bgm        = null;
+let chatMusic  = null;
+let bgmEnabled = false;
 
-let started     = false;   /* has audio context been unlocked */
-let shouldPlay  = false;   /* desired state from settings */
-
-/* ── Play / pause helpers ── */
-function tryPlay() {
-  if (!shouldPlay) return;
-  bgm.play().catch(() => {
-    /* Blocked by browser — will retry on next interaction */
-  });
+function createAudio(src, vol=0.4) {
+  const a = new Audio(src);
+  a.loop   = true;
+  a.volume = vol;
+  return a;
 }
 
-function pause() {
-  bgm.pause();
+function tryPlay(audio) {
+  if (!audio) return;
+  audio.play().catch(()=>{});
 }
 
-/* ── Unlock on first touch/click (browser autoplay policy) ── */
-function unlockAndPlay() {
-  if (started) return;
-  started = true;
-  if (shouldPlay) tryPlay();
+/* ── Start bg music on first user interaction ── */
+function startBGM() {
+  if (!bgmEnabled || bgm) return;
+  bgm = createAudio(BGM_SRC, 0.4);
+  tryPlay(bgm);
 }
-document.addEventListener('click',     unlockAndPlay, { once: true });
-document.addEventListener('touchstart',unlockAndPlay, { once: true });
+
+document.addEventListener('click',     startBGM, { once:true });
+document.addEventListener('touchstart',startBGM, { once:true });
+
+/* ── React to player-ready (apply saved setting) ── */
+document.addEventListener('player-ready', () => {
+  const s = window.PLAYER?.settings || {};
+  bgmEnabled = s.music !== false; /* default on */
+  if (bgmEnabled) startBGM();
+});
 
 /* ── React to settings toggle ── */
 document.addEventListener('settings-changed', e => {
   if (e.detail.key !== 'music') return;
-  shouldPlay = e.detail.value;
-  if (shouldPlay) { started = true; tryPlay(); }
-  else            { pause(); }
+  bgmEnabled = e.detail.value;
+  if (bgmEnabled) {
+    if (!bgm) bgm = createAudio(BGM_SRC, 0.4);
+    tryPlay(bgm);
+  } else {
+    if (bgm) { bgm.pause(); bgm = null; }
+  }
 });
 
-/* ── React to player-ready (apply saved setting on load) ── */
-document.addEventListener('player-ready', () => {
-  const s = window.getSettings?.() || {};
-  shouldPlay = !!s.music;
-  if (shouldPlay) tryPlay();
+/* ── Chat music — play when entering global chat, stop on exit ── */
+document.addEventListener('page-change', e => {
+  if (e.detail.page === 'chirp') {
+    if (!chatMusic) chatMusic = createAudio(CHAT_SRC, 0.35);
+    tryPlay(chatMusic);
+  } else {
+    if (chatMusic) { chatMusic.pause(); chatMusic = null; }
+  }
 });
+
+export { bgm };

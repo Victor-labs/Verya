@@ -1,70 +1,60 @@
 // js/core/modal.js
-// Shared confirm modal + toast notification
-// Export: openModal(), showToast()
-
-/* ── TOAST ── */
-const toastEl = document.getElementById('toast');
-let toastTimer = null;
+// Shared confirm modal + toast
+// openModal({emoji, title, desc, cost, confirmLabel, danger, onConfirm, input, inputPlaceholder, inputMax})
+// showToast(msg)
 
 export function showToast(msg) {
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent  = msg;
+  el.className    = 'toast show';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
 }
-
-/* Make available globally so inline onclick handlers can call it */
 window.showToast = showToast;
 
-/* ── CONFIRM MODAL ── */
-const modal      = document.getElementById('modal');
-const modalCfm   = document.getElementById('modal-confirm');
-const modalCnl   = document.getElementById('modal-cancel');
-let   pendingAction = null;
-
-/**
- * Open the shared confirm modal.
- * @param {object} cfg - { emoji, title, desc, cost, onConfirm, hideConfirm?, input?, inputPlaceholder?, inputMax? }
- */
 export function openModal(cfg) {
-  document.getElementById('modal-emoji').textContent    = cfg.emoji  || '❓';
-  document.getElementById('modal-title').textContent    = cfg.title  || '';
-  document.getElementById('modal-desc').textContent     = cfg.desc   || '';
-  document.getElementById('modal-cost-val').textContent = cfg.cost   || '';
-  modalCfm.style.display = cfg.hideConfirm ? 'none' : '';
-  pendingAction = cfg.onConfirm || null;
+  const modal = document.getElementById('modal'); if (!modal) return;
+  document.getElementById('modal-emoji').textContent   = cfg.emoji  || '❓';
+  document.getElementById('modal-title').textContent   = cfg.title  || '';
+  document.getElementById('modal-desc').textContent    = cfg.desc   || '';
+  document.getElementById('modal-cost').textContent    = cfg.cost   || '';
+  document.getElementById('modal-cost').style.display  = cfg.cost ? '' : 'none';
 
-  // FIX: support optional text input inside modal
-  let inputEl = document.getElementById('modal-input-field');
+  const confirmBtn = document.getElementById('modal-confirm');
+  confirmBtn.textContent = cfg.confirmLabel || 'Confirm';
+  confirmBtn.className   = 'modal-confirm-btn' + (cfg.danger ? ' danger' : '');
+
+  /* Input field for hero rename */
+  const inputWrap = document.getElementById('modal-input-wrap');
+  const inputEl   = document.getElementById('modal-input');
   if (cfg.input) {
-    if (!inputEl) {
-      inputEl = document.createElement('input');
-      inputEl.id          = 'modal-input-field';
-      inputEl.type        = 'text';
-      inputEl.style.cssText = 'width:100%;padding:10px 14px;margin-top:12px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:14px;box-sizing:border-box;';
-      // Insert before confirm button
-      modalCfm.parentNode.insertBefore(inputEl, modalCfm);
-    }
-    inputEl.placeholder = cfg.inputPlaceholder || '';
-    inputEl.maxLength   = cfg.inputMax || 50;
-    inputEl.value       = '';
-    inputEl.style.display = '';
-  } else if (inputEl) {
-    inputEl.style.display = 'none';
+    inputWrap.style.display   = '';
+    inputEl.placeholder       = cfg.inputPlaceholder || '';
+    inputEl.maxLength         = cfg.inputMax || 50;
+    inputEl.value             = '';
+  } else {
+    inputWrap.style.display = 'none';
   }
 
-  modal.classList.add('open');
-  if (cfg.input && inputEl) setTimeout(() => inputEl.focus(), 100);
-}
+  /* Store callback */
+  confirmBtn.onclick = () => {
+    const val = cfg.input ? inputEl.value : undefined;
+    modal.classList.remove('open');
+    if (cfg.onConfirm) cfg.onConfirm(val);
+  };
 
+  document.getElementById('modal-cancel').onclick = () =>
+    modal.classList.remove('open');
+
+  modal.classList.add('open');
+}
 window.openModal = openModal;
 
-modalCnl.addEventListener('click', () => modal.classList.remove('open'));
-modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
-modalCfm.addEventListener('click', () => {
-  // FIX: pass input value to onConfirm if input field exists and is visible
-  const inputEl = document.getElementById('modal-input-field');
-  const inputVal = (inputEl && inputEl.style.display !== 'none') ? inputEl.value : undefined;
-  modal.classList.remove('open');
-  if (pendingAction) pendingAction(inputVal);
+/* Close on backdrop click — wrapped in DOMContentLoaded so DOM exists */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('modal'))
+      document.getElementById('modal').classList.remove('open');
+  });
 });
