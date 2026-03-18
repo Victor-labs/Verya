@@ -139,9 +139,11 @@ window.selectAvatar = function(av) {
   showToast(`${av} Avatar updated!`);
 };
 
-document.getElementById('prf-avatar-btn').addEventListener('click', () => {
-  const picker = document.getElementById('prf-avatar-picker');
-  picker.style.display = picker.style.display === 'none' ? '' : 'none';
+window.addEventListener('load', () => {
+  document.getElementById('prf-avatar-btn')?.addEventListener('click', () => {
+    const picker = document.getElementById('prf-avatar-picker');
+    if (picker) picker.style.display = picker.style.display === 'none' ? '' : 'none';
+  });
 });
 
 /* ── Event hooks ── */
