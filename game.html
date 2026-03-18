@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+  <title>Verya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     ONBOARDING OVERLAY — shown before home
+     on first login only
+═══════════════════════════════════════ -->
+<div id="onboarding-overlay" style="display:none">
+
+  <!-- Step 1: Gender -->
+  <div class="ob-step" id="ob-step-gender" style="display:none">
+    <div class="ob-title">Welcome to Verya</div>
+    <div class="ob-sub">Who are you?</div>
+    <div class="ob-gender-row">
+      <div class="ob-gender-card" onclick="obSelectGender('male')">
+        <div class="ob-gender-emoji">♂️</div>
+        <div class="ob-gender-label">Male</div>
+      </div>
+      <div class="ob-gender-card" onclick="obSelectGender('female')">
+        <div class="ob-gender-emoji">♀️</div>
+        <div class="ob-gender-label">Female</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Starter Character -->
+  <div class="ob-step" id="ob-step-character" style="display:none">
+    <div class="ob-title">Your Starter Character</div>
+    <div class="ob-char-card">
+      <img class="ob-char-img" id="ob-char-img" src="" alt=""/>
+      <div class="ob-char-info">
+        <div class="ob-char-name"  id="ob-char-name">Andrew</div>
+        <div class="ob-char-tier"  id="ob-char-tier">Free Starter · D Tier</div>
+        <div class="ob-char-desc"  id="ob-char-desc"></div>
+      </div>
+    </div>
+    <button class="ob-btn" onclick="obConfirmCharacter()">Continue →</button>
+  </div>
+
+  <!-- Step 3: Alignment -->
+  <div class="ob-step" id="ob-step-alignment" style="display:none">
+    <div class="ob-title">Choose Your Path</div>
+    <div class="ob-sub">This decision shapes how you play Verya</div>
+    <div class="ob-align-row">
+      <div class="ob-align-card" data-align="criminal" onclick="obSelectAlignment('criminal')">
+        <img class="ob-align-img" src="assets/onboarding/criminal.jpg"
+             onerror="this.style.opacity='0.3'"/>
+        <div class="ob-align-name">🔴 Criminal</div>
+        <div class="ob-align-desc">Power through crime. Earn stars. Rule through fear.</div>
+      </div>
+      <div class="ob-align-card" data-align="vigilante" onclick="obSelectAlignment('vigilante')">
+        <img class="ob-align-img" src="assets/onboarding/vigilante.jpg"
+             onerror="this.style.opacity='0.3'"/>
+        <div class="ob-align-name">🔵 Vigilante</div>
+        <div class="ob-align-desc">Fight for justice. Report criminals. Protect the city.</div>
+      </div>
+    </div>
+    <div class="ob-align-warning" id="ob-align-warning" style="display:none"></div>
+    <button class="ob-btn" id="ob-align-confirm-btn" style="display:none"
+            onclick="obConfirmAlignment()">Confirm Choice</button>
+    <button class="ob-back-btn" onclick="showStep('ob-step-character')">← Back</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN SHELL
+═══════════════════════════════════════ -->
+<div id="shell">
+
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <div id="top-left">
+      <div id="top-hero-name">Hero</div>
+      <div id="top-level-row">
+        <span id="top-level">LV. 1</span>
+        <div id="top-xp-bar"><div id="top-xp-fill"></div></div>
+      </div>
+    </div>
+    <div id="top-currencies">
+      <div class="top-currency"><span>⚡</span><span id="top-energy">100</span></div>
+      <div class="top-currency"><span>🪙</span><span id="top-gold">0</span></div>
+      <div class="top-currency"><span>💎</span><span id="top-diamonds">0</span></div>
+    </div>
+    <div id="top-right">
+      <button id="bell-btn">🔔</button>
+      <button id="hamburger-btn">☰</button>
+    </div>
+  </div>
+
+  <!-- GLOBAL CHAT TICKER -->
+  <div id="chat-ticker">
+    <div id="chat-ticker-inner">Loading chat...</div>
+  </div>
+
+  <!-- PAGES — only one has class 'active' at a time -->
+  <div id="pages">
+    <div class="page" id="page-home"></div>
+    <div class="page" id="page-city-center"></div>
+    <div class="page" id="page-verya-net"></div>
+    <div class="page" id="page-chirp"></div>
+    <div class="page" id="page-craft"></div>
+    <div class="page" id="page-characters"></div>
+    <div class="page" id="page-inventory"></div>
+    <div class="page" id="page-quests"></div>
+    <div class="page" id="page-social"></div>
+    <div class="page" id="page-profile"></div>
+    <div class="page" id="page-daily-login"></div>
+    <div class="page" id="page-map"></div>
+    <div class="page" id="page-special-missions"></div>
+    <div class="page" id="page-apartment"></div>
+    <div class="page" id="page-leaderboard"></div>
+    <div class="page" id="page-settings"></div>
+    <div class="page" id="page-mail"></div>
+    <div class="page" id="page-guilds"></div>
+    <div class="page" id="page-skill-tree"></div>
+  </div>
+
+  <!-- BOTTOM NAV — two rows exactly like image 2 -->
+  <nav id="bottom-nav">
+    <div class="nav-row">
+      <button class="nav-btn" data-page="daily-login">
+        <span class="nav-icon">🎁</span>
+        <span class="nav-label">Rewards</span>
+      </button>
+      <button class="nav-btn" data-page="city-center">
+        <span class="nav-icon">🏪</span>
+        <span class="nav-label">City Center</span>
+      </button>
+      <button class="nav-btn" data-page="verya-net">
+        <span class="nav-icon">🌐</span>
+        <span class="nav-label">Verya Net</span>
+      </button>
+      <button class="nav-btn" data-page="chirp">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Chirp</span>
+      </button>
+      <button class="nav-btn" data-page="craft">
+        <span class="nav-icon">⚒️</span>
+        <span class="nav-label">Craft</span>
+      </button>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" data-page="characters">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Characters</span>
+      </button>
+      <button class="nav-btn" data-page="inventory">
+        <span class="nav-icon">🎒</span>
+        <span class="nav-label">Inventory</span>
+      </button>
+      <button class="nav-btn" data-page="quests">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">Quests</span>
+      </button>
+      <button class="nav-btn" data-page="social">
+        <span class="nav-icon">🤝</span>
+        <span class="nav-label">Social</span>
+      </button>
+      <button class="nav-btn active" data-page="profile">
+        <span class="nav-icon">🧝</span>
+        <span class="nav-label">Profile</span>
+      </button>
+    </div>
+  </nav>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     HAMBURGER MENU
+═══════════════════════════════════════ -->
+<div id="hamburger-menu">
+  <div class="hm-panel">
+    <button id="hamburger-close" class="hm-close">✕</button>
+    <div class="hm-item" onclick="goToPage('leaderboard');document.getElementById('hamburger-menu').classList.remove('open')">
+      <span>🏆</span> Leaderboard
+    </div>
+    <div class="hm-item" onclick="goToPage('guilds');document.getElementById('hamburger-menu').classList.remove('open')">
+      <span>🏛️</span> Guilds
+    </div>
+    <div class="hm-item" onclick="goToPage('skill-tree');document.getElementById('hamburger-menu').classList.remove('open')">
+      <span>🌳</span> Skill Tree
+    </div>
+    <div class="hm-item" onclick="goToPage('settings');document.getElementById('hamburger-menu').classList.remove('open')">
+      <span>⚙️</span> Settings
+    </div>
+    <div class="hm-item hm-danger" onclick="doLogout()">
+      <span>🚪</span> Log Out
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     NOTIFICATION PANEL
+═══════════════════════════════════════ -->
+<div id="notif-panel">
+  <div class="notif-header">Notifications</div>
+  <div id="notif-list"><div class="notif-empty">No notifications yet.</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHARED MODAL
+═══════════════════════════════════════ -->
+<div id="modal">
+  <div class="modal-card">
+    <div class="modal-emoji"  id="modal-emoji">❓</div>
+    <div class="modal-title"  id="modal-title">Confirm</div>
+    <div class="modal-desc"   id="modal-desc"></div>
+    <div class="modal-cost"   id="modal-cost" style="display:none"></div>
+    <div class="modal-input-wrap" id="modal-input-wrap" style="display:none">
+      <input class="modal-input" id="modal-input" type="text"/>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel-btn"  id="modal-cancel">Cancel</button>
+      <button class="modal-confirm-btn" id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TOAST
+═══════════════════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════
+     PLAYER TAP POPUP (block/report)
+═══════════════════════════════════════ -->
+<div id="player-tap-popup" style="display:none">
+  <div class="ptap-card">
+    <div class="ptap-name" id="ptap-name">Player</div>
+    <div class="ptap-btns">
+      <button id="ptap-view">👁 View Profile</button>
+      <button id="ptap-block">🚫 Block</button>
+      <button id="ptap-report">🚨 Report</button>
+    </div>
+    <button id="ptap-close" class="ptap-close">✕</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PVP WARNING MODAL
+═══════════════════════════════════════ -->
+<div id="pvp-warning-modal" style="display:none">
+  <div class="pvp-warn-card">
+    <div class="pvp-warn-title">⚠️ PVP Protection Active</div>
+    <div class="pvp-warn-text">You are under PVP protection until Level 15. If you attack now, your protection will be permanently removed and you may be wanted by the CIA.</div>
+    <div class="pvp-warn-btns">
+      <button onclick="document.getElementById('pvp-warning-modal').style.display='none'">Cancel</button>
+      <button id="pvp-warn-confirm">Attack Anyway</button>
+    </div>
+  </div>
+</div>
+
+<!-- Entry point -->
+<script type="module" src="js/main.js"></script>
+
+  <!-- ═══ COMBAT OVERLAY ═══ -->
+  <div id="combat-overlay">
+    <canvas id="combat-canvas"></canvas>
+    <div id="combat-crit-flash"></div>
+    <div class="combat-ui">
+      <div class="combat-topbar">
+        <div id="combat-zone-label">Zone</div>
+        <button id="combat-forfeit-btn">🏳️ Forfeit</button>
+      </div>
+      <div class="combat-enemy-section">
+        <div class="combat-enemy-emoji" id="combat-enemy-emoji">💀</div>
+        <div class="combat-enemy-name"  id="combat-enemy-name">Enemy</div>
+        <div class="combat-enemy-hp-wrap">
+          <div class="combat-enemy-hp-fill" id="combat-enemy-hp-fill" style="width:100%"></div>
+          <div class="combat-enemy-hp-text" id="combat-enemy-hp-text">100/100</div>
+        </div>
+      </div>
+      <div class="combat-log" id="combat-log"></div>
+      <!-- TIMING BAR -->
+      <div class="combat-timing-section">
+        <div class="combat-timing-label">Tap the green zone!</div>
+        <div class="combat-timing-bar" id="combat-timing-bar">
+          <div class="timing-red-left"></div>
+          <div class="timing-yellow-left"></div>
+          <div class="timing-green"></div>
+          <div class="timing-yellow-right"></div>
+          <div class="timing-red-right"></div>
+          <div class="combat-pin" id="combat-pin"></div>
+        </div>
+      </div>
+      <!-- PLAYER BARS -->
+      <div class="combat-player-bars">
+        <div class="combat-bar-row">
+          <span class="combat-bar-lbl" style="color:#2ecc71">HP</span>
+          <div class="combat-bar-track"><div class="combat-bar-fill hp" id="combat-hp-fill" style="width:100%"></div></div>
+          <span class="combat-bar-val" id="combat-hp-val">100/100</span>
+        </div>
+        <div class="combat-bar-row">
+          <span class="combat-bar-lbl" style="color:#3498db">MP</span>
+          <div class="combat-bar-track"><div class="combat-bar-fill mp" id="combat-mp-fill" style="width:100%"></div></div>
+          <span class="combat-bar-val" id="combat-mp-val">50/50</span>
+        </div>
+      </div>
+      <!-- BOTTOM ROW: abilities + quick items -->
+      <div class="combat-bottom-row">
+        <div class="combat-ability-slots">
+          <div class="combat-ability-slot empty" id="combat-ability-1"></div>
+          <div class="combat-ability-slot empty" id="combat-ability-2"></div>
+        </div>
+        <button class="combat-skill-btn" id="combat-skill-btn">🔮 Skill</button>
+        <div class="combat-quick-slots">
+          <div class="combat-quick-slot" id="quick-slot-1"></div>
+          <div class="combat-quick-slot" id="quick-slot-2"></div>
+          <div class="combat-quick-slot" id="quick-slot-3"></div>
+        </div>
+      </div>
+    </div>
+    <!-- RESULT -->
+    <div id="combat-result">
+      <div id="result-emoji">🏆</div>
+      <div id="result-title" class="result-title">Victory!</div>
+      <div id="result-rewards"></div>
+      <div id="result-drop" style="display:none"></div>
+      <button id="result-btn" class="result-btn">Continue</button>
+    </div>
+  </div>
+
+<script>
+/* Logout */
+async function doLogout() {
+  const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+  const { initializeApp }    = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+  try { await signOut(getAuth()); } catch(e) {}
+  window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>

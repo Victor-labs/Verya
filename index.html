@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+  <title>Verya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --gold:#c9a84c;--gold-l:#e8c96a;
+      --blue:#00aaff;--blue-d:#0066cc;
+      --f-title:'Cinzel Decorative',serif;
+      --f-head:'Cinzel',serif;
+      --f-body:'Crimson Text',serif;
+    }
+    html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+
+    /* ══ SPLASH ══ */
+    #splash{
+      position:fixed;inset:0;z-index:100;
+      background:radial-gradient(ellipse at 50% 30%,rgba(0,40,100,0.95),#000 70%);
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:0;
+    }
+    #splash-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+    .splash-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;padding:0 32px;}
+
+    .splash-logo{
+      font-family:var(--f-title);font-size:56px;font-weight:700;
+      background:linear-gradient(135deg,#0066ff,#00ccff,#fff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      filter:drop-shadow(0 0 40px rgba(0,150,255,0.7));
+      animation:logoPulse 2s ease-in-out infinite;
+      letter-spacing:0.05em;
+    }
+    @keyframes logoPulse{
+      0%,100%{filter:drop-shadow(0 0 24px rgba(0,150,255,0.5));}
+      50%{filter:drop-shadow(0 0 60px rgba(0,200,255,1));}
+    }
+    .splash-tagline{
+      font-family:var(--f-body);font-style:italic;font-size:14px;
+      color:rgba(100,200,255,0.7);letter-spacing:0.2em;margin-top:-8px;
+    }
+    .splash-bar-wrap{
+      width:260px;height:3px;background:rgba(255,255,255,0.08);
+      border-radius:2px;overflow:hidden;margin-top:8px;
+    }
+    .splash-bar-fill{
+      height:100%;width:0%;border-radius:2px;
+      background:linear-gradient(90deg,#0055ff,#00ccff);
+      box-shadow:0 0 12px rgba(0,200,255,0.8);
+      transition:width 0.4s ease;
+    }
+    .splash-hint{
+      font-family:var(--f-body);font-style:italic;font-size:13px;
+      color:rgba(150,210,255,0.65);text-align:center;
+      min-height:44px;padding:0 16px;
+      animation:hintFade 0.6s ease;
+    }
+    @keyframes hintFade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ══ LOGIN ══ */
+    #login-page{
+      display:none;position:fixed;inset:0;z-index:50;
+      flex-direction:column;align-items:center;justify-content:center;
+      background:radial-gradient(ellipse at 50% 20%,rgba(0,40,120,0.5),rgba(0,0,8,0.98) 65%);
+      padding:20px;overflow-y:auto;
+    }
+    #login-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+    .login-logo{
+      font-family:var(--f-title);font-size:44px;font-weight:700;
+      background:linear-gradient(135deg,#0055ff,#00ccff,#fff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      filter:drop-shadow(0 0 24px rgba(0,150,255,0.6));
+      margin-bottom:4px;position:relative;z-index:1;
+    }
+    .login-sub{
+      font-family:var(--f-body);font-style:italic;font-size:13px;
+      color:rgba(100,180,255,0.6);letter-spacing:0.15em;
+      margin-bottom:32px;position:relative;z-index:1;
+    }
+    .login-card{
+      width:100%;max-width:380px;position:relative;z-index:1;
+      background:rgba(4,6,20,0.95);
+      border:1px solid rgba(0,150,255,0.2);
+      border-radius:20px;padding:28px 22px;
+    }
+    .login-card::before{
+      content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+      background:linear-gradient(to right,transparent,rgba(0,200,255,0.5),transparent);
+    }
+    .login-tabs{
+      display:flex;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);border-radius:10px;
+      padding:3px;margin-bottom:22px;gap:0;
+    }
+    .login-tab{
+      flex:1;padding:10px;border-radius:8px;border:none;background:transparent;
+      font-family:var(--f-head);font-size:10px;font-weight:700;
+      letter-spacing:0.15em;text-transform:uppercase;
+      color:rgba(255,255,255,0.35);cursor:pointer;transition:all 0.2s;
+    }
+    .login-tab.active{
+      background:rgba(0,150,255,0.15);color:rgba(100,210,255,0.95);
+      border:1px solid rgba(0,150,255,0.35);
+    }
+    .login-field{margin-bottom:14px;}
+    .login-label{
+      font-family:var(--f-head);font-size:9px;letter-spacing:0.18em;
+      text-transform:uppercase;color:rgba(100,180,255,0.6);
+      display:block;margin-bottom:6px;
+    }
+    .login-input{
+      width:100%;padding:13px 14px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(0,150,255,0.15);border-radius:10px;
+      font-family:var(--f-body);font-size:15px;
+      color:rgba(255,255,255,0.85);outline:none;
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .login-input:focus{
+      border-color:rgba(0,150,255,0.45);
+      box-shadow:0 0 16px rgba(0,150,255,0.12);
+    }
+    .login-input::placeholder{color:rgba(255,255,255,0.18);}
+    .login-btn{
+      width:100%;padding:15px;margin-top:4px;
+      background:linear-gradient(105deg,#0044cc,#0099ff,#0044cc);
+      border:1px solid rgba(0,200,255,0.4);border-radius:12px;
+      font-family:var(--f-head);font-size:11px;font-weight:700;
+      letter-spacing:0.25em;text-transform:uppercase;
+      color:#fff;cursor:pointer;
+      transition:box-shadow 0.2s,transform 0.12s;
+    }
+    .login-btn:active{transform:scale(0.97);}
+    .login-btn:hover{box-shadow:0 0 28px rgba(0,200,255,0.4);}
+    .login-error{
+      font-family:var(--f-body);font-style:italic;font-size:12px;
+      color:#ef4444;text-align:center;margin-top:12px;min-height:18px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <canvas id="splash-canvas"></canvas>
+  <div class="splash-content">
+    <div class="splash-logo">VERYA</div>
+    <div class="splash-tagline">The world has fallen. Will you rise?</div>
+    <div class="splash-bar-wrap">
+      <div class="splash-bar-fill" id="splash-bar"></div>
+    </div>
+    <div class="splash-hint" id="splash-hint">Entering the world of Verya...</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <canvas id="login-canvas"></canvas>
+  <div class="login-logo">VERYA</div>
+  <div class="login-sub">Enter the corrupted world</div>
+  <div class="login-card">
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login"    onclick="switchTab('login')">Sign In</button>
+      <button class="login-tab"        id="tab-register" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <div id="form-login">
+      <div class="login-field">
+        <label class="login-label">Email</label>
+        <input class="login-input" type="email" id="login-email" placeholder="your@email.com"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" id="login-pass" placeholder="••••••••"/>
+      </div>
+      <button class="login-btn" onclick="doLogin()">Enter Verya</button>
+    </div>
+
+    <div id="form-register" style="display:none">
+      <div class="login-field">
+        <label class="login-label">Hero Name</label>
+        <input class="login-input" type="text" id="reg-name" placeholder="Choose your name..." maxlength="20"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Email</label>
+        <input class="login-input" type="email" id="reg-email" placeholder="your@email.com"/>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" id="reg-pass" placeholder="Min 6 characters"/>
+      </div>
+      <button class="login-btn" onclick="doRegister()">Create Hero</button>
+    </div>
+
+    <div class="login-error" id="auth-error"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth,
+         signInWithEmailAndPassword,
+         createUserWithEmailAndPassword,
+         onAuthStateChanged }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore,
+         doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyAVLi7FV1j-Nd5VABk0BxJxB6P8IYeLaNQ",
+  authDomain:"veryagame.firebaseapp.com",
+  projectId:"veryagame",
+  storageBucket:"veryagame.firebasestorage.app",
+  messagingSenderId:"926929873025",
+  appId:"1:926929873025:web:ab3f5f5b6b558df6f78580"
+};
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* ── Audio ── */
+let splashAudio = null;
+let loginAudio  = null;
+
+function playAudio(src, vol=0.5) {
+  const a    = new Audio(src);
+  a.loop     = true;
+  a.volume   = vol;
+  a.play().catch(()=>{});
+  return a;
+}
+
+/* ── Particles ── */
+function startParticles(canvasId) {
+  const cvs = document.getElementById(canvasId);
+  if (!cvs) return null;
+  cvs.width  = window.innerWidth;
+  cvs.height = window.innerHeight;
+  const ctx  = cvs.getContext('2d');
+  const pts  = Array.from({length:70},()=>({
+    x:Math.random()*cvs.width, y:Math.random()*cvs.height,
+    r:Math.random()*1.8+0.3,
+    vx:(Math.random()-0.5)*0.35,
+    vy:(Math.random()-0.5)*0.35,
+    a:Math.random()*Math.PI*2,
+  }));
+  let id;
+  function draw(){
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.a+=0.008;
+      if(p.x<0||p.x>cvs.width)  p.vx*=-1;
+      if(p.y<0||p.y>cvs.height) p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,180,255,${0.25+Math.sin(p.a)*0.15})`;
+      ctx.fill();
+      pts.forEach(q=>{
+        const d=Math.hypot(p.x-q.x,p.y-q.y);
+        if(d<90){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle=`rgba(0,140,255,${0.05*(1-d/90)})`;
+          ctx.lineWidth=0.4;ctx.stroke();
+        }
+      });
+    });
+    id=requestAnimationFrame(draw);
+  }
+  draw();
+  return ()=>cancelAnimationFrame(id);
+}
+
+/* ── Splash hints ── */
+const HINTS = [
+  "💡 Time your attacks carefully — green zone deals full damage.",
+  "⚔️ Criminal players earn stars. 6 stars means jail.",
+  "🏚️ Start in Ashen Slums and climb to Oblivion Citadel.",
+  "💎 Evil items cannot be bought — only crafted or found.",
+  "🏠 Own an apartment to expand your vault and unlock the studio.",
+  "🎯 Complete David's quests to learn everything about Verya.",
+  "🔮 SS tier characters have the most powerful abilities in the game.",
+  "🪙 Gold Vouchers are worth 1000 coins each — spend them wisely.",
+  "⚡ Energy regenerates over time — use it for combat and scanning.",
+  "🏛️ Join a guild for shared missions and boosted ranking.",
+];
+
+let hintIdx = 0;
+let progress = 0;
+let stopSplashParticles = null;
+
+function nextHint() {
+  const el = document.getElementById('splash-hint');
+  if (!el) return;
+  el.style.animation='none';
+  void el.offsetWidth;
+  el.textContent     = HINTS[hintIdx % HINTS.length];
+  el.style.animation = 'hintFade 0.6s ease';
+  hintIdx++;
+}
+
+function animateSplash(onDone) {
+  /* Play loading music */
+  splashAudio = playAudio('assets/audio/breakingdawn.mp3', 0.55);
+  stopSplashParticles = startParticles('splash-canvas');
+  nextHint();
+
+  /* 40 seconds total — progress ticks every ~1.6s */
+  const TOTAL  = 40000;
+  const TICKS  = 25;
+  const DELAY  = TOTAL / TICKS;
+  let   tick   = 0;
+
+  const interval = setInterval(()=>{
+    tick++;
+    progress = Math.min((tick / TICKS) * 100, 100);
+    document.getElementById('splash-bar').style.width = progress + '%';
+    if (tick % 3 === 0) nextHint();
+    if (tick >= TICKS) {
+      clearInterval(interval);
+      onDone();
+    }
+  }, DELAY);
+}
+
+function showLogin() {
+  /* Stop splash particles */
+  if (stopSplashParticles) stopSplashParticles();
+
+  /* Fade out splash */
+  const splash = document.getElementById('splash');
+  splash.style.transition = 'opacity 0.8s ease';
+  splash.style.opacity    = '0';
+
+  setTimeout(()=>{
+    splash.style.display = 'none';
+    /* Stop splash music, start login music */
+    if (splashAudio) { splashAudio.pause(); splashAudio = null; }
+    loginAudio = playAudio('assets/audio/breakingdawn.mp3', 0.45);
+
+    const lp = document.getElementById('login-page');
+    lp.style.display = 'flex';
+    startParticles('login-canvas');
+  }, 800);
+}
+
+/* ── Auth state — already logged in → game ── */
+let authChecked = false;
+onAuthStateChanged(auth, user => {
+  if (user && authChecked) {
+    /* Stop login music before going to game */
+    if (loginAudio) { loginAudio.pause(); loginAudio = null; }
+    window.location.href = 'game.html';
+  }
+  authChecked = true;
+});
+
+/* Start splash immediately */
+animateSplash(() => setTimeout(showLogin, 500));
+
+/* ── UI helpers ── */
+const setError = msg => { document.getElementById('auth-error').textContent = msg||''; };
+
+window.switchTab = function(tab) {
+  document.getElementById('tab-login').classList.toggle('active',    tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display    = tab==='login'    ? '' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
+  setError('');
+};
+
+/* ── Login ── */
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email||!pass) { setError('Please fill in all fields.'); return; }
+  setError('');
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    setError(
+      e.code==='auth/wrong-password'||e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'
+        ? 'Invalid email or password.'
+        : e.message
+    );
+  }
+};
+
+/* ── Register ── */
+window.doRegister = async function() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if (!name||!email||!pass) { setError('Please fill in all fields.'); return; }
+  if (name.length < 2)      { setError('Hero name must be at least 2 characters.'); return; }
+  if (pass.length < 6)      { setError('Password must be at least 6 characters.'); return; }
+  setError('');
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const uid  = cred.user.uid;
+
+    /* Create player document — heroNameLower included for search */
+    await setDoc(doc(db,'players',uid), {
+      uid,
+      heroName:          name,
+      heroNameLower:     name.toLowerCase(),
+      email,
+      level:             1,
+      xp:                0,
+      gold:              500,
+      diamonds:          0,
+      hp:                100,
+      maxHp:             100,
+      mp:                50,
+      maxMp:             50,
+      energy:            100,
+      stamina:           100,
+      maxStamina:        100,
+      inventory:         [],
+      equipped:          {},
+      ownedCharacters:   [],
+      equippedCharacter: null,
+      equippedAbilities: [],
+      currentZone:       'ashen-slums',
+      clearedZones:      [],
+      kills:             0,
+      totalKills:        0,
+      totalBossKills:    0,
+      goldEarned:        0,
+      totalEnters:       0,
+      totalScans:        0,
+      alignment:         null,
+      gender:            null,
+      criminalStars:     0,
+      isJailed:          false,
+      jailUntil:         null,
+      pvpEnabled:        false,
+      pvpProtection:     true,
+      friends:           [],
+      blockedUsers:      [],
+      guildId:           null,
+      apartments:        [],
+      vaultItems:        [],
+      settings:          {},
+      skillTree:         { forexTrader:0, dataAnalyst:0, assailant:0, cyberElk:0, daemon:0 },
+      dailyLogin:        { lastClaim:null, currentDay:0 },
+      missionsClaimed:   {},
+      nextRent:          {},
+      onboardingComplete: false,
+      status:            'online',
+      totalTrades:       0,
+      stockWins:         0,
+      stockLosses:       0,
+      stockNetProfit:    0,
+      createdAt:         new Date().toISOString(),
+    });
+    /* onAuthStateChanged will fire and redirect to game.html */
+  } catch(e) {
+    setError(
+      e.code==='auth/email-already-in-use'
+        ? 'That email is already registered.'
+        : e.message
+    );
+  }
+};
+</script>
+</body>
+</html>
