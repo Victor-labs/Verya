@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+  <title>Verya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+
+<!-- ONBOARDING OVERLAY -->
+<div id="onboarding-overlay" style="display:none">
+  <div class="ob-step" id="ob-step-gender" style="display:none">
+    <div class="ob-title">Welcome to Verya</div>
+    <div class="ob-sub">Who are you?</div>
+    <div class="ob-gender-row">
+      <div class="ob-gender-card" onclick="obSelectGender('male')"><div class="ob-gender-emoji">♂️</div><div class="ob-gender-label">Male</div></div>
+      <div class="ob-gender-card" onclick="obSelectGender('female')"><div class="ob-gender-emoji">♀️</div><div class="ob-gender-label">Female</div></div>
+    </div>
+  </div>
+  <div class="ob-step" id="ob-step-character" style="display:none">
+    <div class="ob-title">Your Starter Character</div>
+    <div class="ob-char-card">
+      <img class="ob-char-img" id="ob-char-img" src="" alt=""/>
+      <div class="ob-char-info">
+        <div class="ob-char-name" id="ob-char-name">Andrew</div>
+        <div class="ob-char-tier" id="ob-char-tier">Free Starter · D Tier</div>
+        <div class="ob-char-desc" id="ob-char-desc"></div>
+      </div>
+    </div>
+    <button class="ob-btn" onclick="obConfirmCharacter()">Continue →</button>
+  </div>
+  <div class="ob-step" id="ob-step-alignment" style="display:none">
+    <div class="ob-title">Choose Your Path</div>
+    <div class="ob-sub">This decision shapes how you play Verya</div>
+    <div class="ob-align-row">
+      <div class="ob-align-card" data-align="criminal" onclick="obSelectAlignment('criminal')">
+        <img class="ob-align-img" src="assets/onboarding/criminal.jpg" onerror="this.style.opacity='0.3'"/>
+        <div class="ob-align-name">🔴 Criminal</div>
+        <div class="ob-align-desc">Power through crime. Earn stars. Rule through fear.</div>
+      </div>
+      <div class="ob-align-card" data-align="vigilante" onclick="obSelectAlignment('vigilante')">
+        <img class="ob-align-img" src="assets/onboarding/vigilante.jpg" onerror="this.style.opacity='0.3'"/>
+        <div class="ob-align-name">🔵 Vigilante</div>
+        <div class="ob-align-desc">Fight for justice. Report criminals. Protect the city.</div>
+      </div>
+    </div>
+    <div class="ob-align-warning" id="ob-align-warning" style="display:none"></div>
+    <button class="ob-btn" id="ob-align-confirm-btn" style="display:none" onclick="obConfirmAlignment()">Confirm Choice</button>
+    <button class="ob-back-btn" onclick="showStep('ob-step-character')">← Back</button>
+  </div>
+</div>
+
+<!-- MAIN SHELL -->
+<div id="shell">
+
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <div id="top-left">
+      <div id="top-hero-name">Hero</div>
+      <div id="top-level-row">
+        <span id="top-level">LV. 1</span>
+        <div id="top-xp-bar"><div id="top-xp-fill"></div></div>
+      </div>
+    </div>
+    <div id="top-currencies">
+      <div class="top-currency"><span>⚡</span><span id="top-energy">100</span></div>
+      <div class="top-currency"><span>🪙</span><span id="top-gold">0</span></div>
+      <div class="top-currency"><span>💎</span><span id="top-diamonds">0</span></div>
+    </div>
+    <div id="top-right">
+      <button id="bell-btn">🔔</button>
+      <button id="hamburger-btn">☰</button>
+    </div>
+  </div>
+
+  <!-- CHAT TICKER -->
+  <div id="chat-ticker"><div id="chat-ticker-inner">No messages yet...</div></div>
+
+  <!-- ═══ PAGES ═══ -->
+  <div id="pages">
+
+    <!-- HOME — rendered by home.js -->
+    <div class="page" id="page-home"></div>
+
+    <!-- CITY CENTER -->
+    <div class="page" id="page-city-center">
+      <div class="page-title">🏙️ City Center</div>
+      <div class="city-page-sub">Shops, services and NPCs</div>
+      <div class="city-shop-list" id="city-center-list"></div>
+      <div id="shop-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+        <div class="shop-overlay-header"><button id="shop-overlay-back" style="font-size:22px;color:#8a7fa0;padding:8px;">‹</button><div id="shop-overlay-title" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;flex:1;"></div></div>
+        <div id="shop-overlay-content" style="flex:1;overflow-y:auto;padding:16px;"></div>
+      </div>
+      <div id="npc-dialogue-overlay" style="display:none;position:fixed;inset:0;z-index:250;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:32px;">
+        <div class="npc-d-card">
+          <div class="npc-d-top"><img id="npc-d-img" src="" alt="NPC" style="width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0;" onerror="this.style.opacity='0.3'"/><div class="npc-d-info"><div id="npc-d-name" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;margin-bottom:4px;"></div><div id="npc-d-text" style="font-family:'Crimson Text',serif;font-style:italic;font-size:14px;color:rgba(237,224,204,0.85);line-height:1.5;"></div></div></div>
+          <div id="npc-d-options"></div>
+          <button id="npc-d-back" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;color:#8a7fa0;background:none;border:none;padding:8px 0;cursor:pointer;">← Back</button>
+        </div>
+      </div>
+      <div id="pachinko-overlay" style="display:none;position:fixed;inset:0;z-index:260;background:rgba(0,0,0,0.9);flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;">
+        <div class="pachinko-title">🎰 Pachinko</div>
+        <div id="pachinko-spinner" style="font-size:80px;">🎰</div>
+        <div id="pachinko-result" style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.15em;color:#e8c96a;text-align:center;min-height:24px;"></div>
+        <button class="pachinko-spin-btn" onclick="spinPachinko()">Spin!</button>
+        <button id="pachinko-close" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;color:#8a7fa0;background:none;border:none;cursor:pointer;">Close</button>
+      </div>
+    </div>
+
+    <!-- VERYA NET -->
+    <div class="page" id="page-verya-net">
+      <div class="page-title">🌐 Verya Net</div>
+      <div id="vnet-hub"></div>
+      <div id="vnet-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+        <div class="vnet-overlay-header"><button id="vnet-overlay-back" style="font-size:22px;color:#8a7fa0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">‹</button><div id="vnet-overlay-title" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;flex:1;padding-left:12px;"></div></div>
+        <div id="vnet-overlay-content" style="flex:1;overflow-y:auto;padding:16px;"></div>
+      </div>
+    </div>
+
+    <!-- CHIRP -->
+    <div class="page" id="page-chirp">
+      <div class="chirp-tabs">
+        <div class="chirp-tab active" onclick="switchChirpTab('feed',this)">📰 Feed</div>
+        <div class="chirp-tab"       onclick="switchChirpTab('chat',this)">💬 Global Chat</div>
+      </div>
+      <div id="chirp-feed-panel" style="overflow-y:auto;padding:10px 14px 16px;">
+        <div id="chirp-feed-list"></div>
+      </div>
+      <div id="chirp-chat-panel" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <div id="chirp-chat-header" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#e8c96a;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;">Global Chat</div>
+        <div id="chirp-chat-messages" style="flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:10px;"></div>
+        <div id="chat-reply-bar" style="display:none;background:rgba(0,100,200,0.15);border-left:2px solid #00aaff;padding:6px 14px;font-family:'Crimson Text',serif;font-style:italic;font-size:12px;color:#8a7fa0;"></div>
+        <div class="chat-input-row">
+          <input id="chat-input" type="text" placeholder="Say something..." style="flex:1;padding:11px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:24px;font-family:'Crimson Text',serif;font-size:14px;color:#ede0cc;outline:none;"/>
+          <button class="chat-send-btn" onclick="sendChatMsg()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CRAFT -->
+    <div class="page" id="page-craft">
+      <div class="page-title">⚒️ Crafting</div>
+      <div style="display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none;" id="craft-cats"></div>
+      <div style="padding:0 14px 20px;" id="craft-list"></div>
+    </div>
+
+    <!-- CHARACTERS -->
+    <div class="page" id="page-characters">
+      <div class="page-title">👤 Characters</div>
+      <div class="char-grid" id="char-grid"></div>
+      <div id="char-detail-modal" style="display:none;position:fixed;inset:0;z-index:280;flex-direction:column;background-size:cover;background-position:top;">
+        <div class="cd-overlay"></div>
+        <div class="cd-content">
+          <button class="cd-back" onclick="document.getElementById('char-detail-modal').style.display='none'">‹</button>
+          <div class="cd-header">
+            <div class="cd-name"    id="cd-name"></div>
+            <div class="cd-tier"    id="cd-tier"></div>
+            <div class="cd-stars"   id="cd-stars"></div>
+            <div class="cd-barcode" id="cd-barcode"></div>
+          </div>
+          <div class="cd-ability-section">
+            <div class="cd-ability-label">ABILITY</div>
+            <div class="cd-ability-inner" id="cd-ability-inner"></div>
+          </div>
+          <div class="cd-stats-section">
+            <div class="cd-stats-label">STATS</div>
+            <div class="cd-stat-row"><span>Damage</span><span id="cd-dmg" style="color:#e8c96a;"></span></div>
+            <div class="cd-stat-row"><span>HP</span><span id="cd-hp" style="color:#e8c96a;"></span></div>
+            <div class="cd-stat-row"><span>Stamina</span><span id="cd-stamina" style="color:#e8c96a;"></span></div>
+          </div>
+          <div class="cd-action-section" id="cd-actions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="page" id="page-inventory">
+      <div class="page-title">🎒 Inventory</div>
+      <div class="inv-equip-section">
+        <div class="inv-equip-title">Equipped</div>
+        <div class="inv-diamond-grid">
+          <div class="inv-slot inv-slot-head"    id="eslot-head">    <div class="inv-slot-label">Head</div></div>
+          <div class="inv-slot inv-slot-weapon"  id="eslot-weapon">  <div class="inv-slot-label">Weapon</div></div>
+          <div class="inv-slot inv-slot-chest"   id="eslot-chest">   <div class="inv-slot-label">Chest</div></div>
+          <div class="inv-slot inv-slot-trinket" id="eslot-trinket"> <div class="inv-slot-label">Trinket</div></div>
+          <div class="inv-slot inv-slot-boots"   id="eslot-boots">   <div class="inv-slot-label">Boots</div></div>
+        </div>
+      </div>
+      <div class="inv-bag-title">Bag</div>
+      <div class="inv-bag-grid" id="inv-bag-grid"></div>
+      <div id="inv-empty-state" class="empty-state" style="display:none;">Your bag is empty.</div>
+      <div id="inv-modal-card" style="display:none;position:fixed;inset:0;z-index:280;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;">
+        <div style="background:rgba(14,11,22,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center;">
+          <div id="inv-modal-icon"   style="font-size:48px;margin-bottom:10px;"></div>
+          <div id="inv-modal-rarity" style="margin-bottom:6px;"></div>
+          <div id="inv-modal-name"   style="font-family:'Cinzel',serif;font-size:16px;font-weight:600;color:#e8c96a;margin-bottom:6px;"></div>
+          <div id="inv-modal-cat"    style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;color:#8a7fa0;margin-bottom:8px;"></div>
+          <div id="inv-modal-effect" style="font-family:'Crimson Text',serif;font-style:italic;font-size:14px;color:rgba(237,224,204,0.75);margin-bottom:8px;"></div>
+          <div id="inv-modal-lore"   style="font-family:'Crimson Text',serif;font-style:italic;font-size:12px;color:#8a7fa0;margin-bottom:16px;"></div>
+          <div style="display:flex;gap:10px;">
+            <button id="inv-modal-use"   style="flex:1;padding:12px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);border-radius:10px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:#4ade80;cursor:pointer;"></button>
+            <button id="inv-modal-equip" style="flex:1;padding:12px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:10px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:#e8c96a;cursor:pointer;"></button>
+            <button id="inv-modal-close" onclick="document.getElementById('inv-modal-card').style.display='none'" style="flex:1;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:#8a7fa0;cursor:pointer;">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUESTS — fully rendered by quests.js -->
+    <div class="page" id="page-quests"></div>
+
+    <!-- SOCIAL -->
+    <div class="page" id="page-social">
+      <div class="page-title">🤝 Social</div>
+      <div class="social-search-bar">
+        <input id="social-search-input" type="text" placeholder="Search player by hero name..." style="flex:1;padding:11px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-family:'Crimson Text',serif;font-size:14px;color:#ede0cc;outline:none;"/>
+        <button class="social-search-btn" onclick="searchPlayers()">Search</button>
+      </div>
+      <div id="social-search-results" style="padding:0 14px;"></div>
+      <div id="player-profile-modal" style="display:none;position:fixed;inset:0;z-index:280;background:var(--bg);flex-direction:column;overflow-y:auto;">
+        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <button id="pp-close" style="font-size:22px;color:#8a7fa0;background:none;border:none;cursor:pointer;margin-right:8px;">‹</button>
+          <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;">Player Profile</div>
+        </div>
+        <div style="padding:20px;text-align:center;">
+          <div id="pp-portrait" style="width:80px;height:80px;font-size:48px;margin:0 auto 12px;"></div>
+          <div id="pp-name"  style="font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:#e8c96a;margin-bottom:4px;"></div>
+          <div id="pp-level" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;color:#8a7fa0;margin-bottom:4px;"></div>
+          <div id="pp-align" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.1em;color:#8a7fa0;margin-bottom:4px;"></div>
+          <div id="pp-guild" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.1em;color:#8a7fa0;margin-bottom:16px;"></div>
+          <div class="profile-action-btns">
+            <button class="profile-action-btn attack" id="pp-attack-btn">⚡ Attack</button>
+            <button class="profile-action-btn mail"   id="pp-mail-btn">✉️ Mail</button>
+            <button class="profile-action-btn friend" id="pp-friend-btn">+ Friend</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="page-title">🧝 Profile</div>
+      <div style="padding:0 14px 20px;">
+        <div style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div id="prf-avatar" style="font-size:48px;flex-shrink:0;">⚔️</div>
+            <div style="flex:1;">
+              <div id="prf-hero-name"  style="font-family:'Cinzel',serif;font-size:16px;font-weight:600;color:#e8c96a;margin-bottom:3px;"></div>
+              <div id="prf-soul-class" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;color:#8a7fa0;margin-bottom:6px;"></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <div id="prf-badge-level" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:6px;padding:2px 8px;color:#e8c96a;"></div>
+                <div id="prf-badge-zone"  style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.1em;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:2px 8px;color:#8a7fa0;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:14px;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7fa0;margin-bottom:8px;">Experience</div>
+          <div style="height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;margin-bottom:6px;"><div id="prf-xp-fill" style="height:100%;background:linear-gradient(90deg,#c9a84c,#e8c96a);border-radius:5px;width:0%;transition:width 0.5s;"></div></div>
+          <div id="prf-xp-val"  style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.08em;color:#8a7fa0;"></div>
+          <div id="prf-xp-next" style="font-family:'Cinzel',serif;font-size:9px;color:#8a7fa0;margin-top:3px;"></div>
+        </div>
+        <div style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:14px;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7fa0;margin-bottom:10px;">Vitals</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Cinzel',serif;font-size:9px;color:#2ecc71;width:22px;">HP</span><div style="flex:1;height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;"><div id="prf-hp-fill" style="height:100%;background:linear-gradient(90deg,#1a8449,#2ecc71);border-radius:5px;width:100%;"></div></div><span id="prf-hp-val" style="font-family:'Cinzel',serif;font-size:9px;color:#8a7fa0;min-width:56px;text-align:right;"></span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Cinzel',serif;font-size:9px;color:#3498db;width:22px;">MP</span><div style="flex:1;height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;"><div id="prf-mp-fill" style="height:100%;background:linear-gradient(90deg,#1a4d8a,#3498db);border-radius:5px;width:100%;"></div></div><span id="prf-mp-val" style="font-family:'Cinzel',serif;font-size:9px;color:#8a7fa0;min-width:56px;text-align:right;"></span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Cinzel',serif;font-size:9px;color:#3df0f0;width:22px;">ST</span><div style="flex:1;height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;"><div id="prf-st-fill" style="height:100%;background:linear-gradient(90deg,#0e6464,#3df0f0);border-radius:5px;width:100%;"></div></div><span id="prf-st-val" style="font-family:'Cinzel',serif;font-size:9px;color:#8a7fa0;min-width:56px;text-align:right;"></span></div>
+          </div>
+        </div>
+        <div style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:14px;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7fa0;margin-bottom:10px;">Combat Stats</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span>Strength</span><span id="prf-str-val" style="color:#e8c96a;"></span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span>Agility</span><span id="prf-agi-val" style="color:#e8c96a;"></span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span>Intelligence</span><span id="prf-int-val" style="color:#e8c96a;"></span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span>Endurance</span><span id="prf-end-val" style="color:#e8c96a;"></span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:11px;padding:4px 0;"><span>Luck</span><span id="prf-lck-val" style="color:#e8c96a;"></span></div>
+          </div>
+        </div>
+        <div style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:14px;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7fa0;margin-bottom:10px;">Battle Record</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="text-align:center;"><div id="prf-rec-kills"  style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#e8c96a;"></div><div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.12em;color:#8a7fa0;">KILLS</div></div>
+            <div style="text-align:center;"><div id="prf-rec-bosses" style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#e8c96a;"></div><div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.12em;color:#8a7fa0;">BOSSES</div></div>
+            <div style="text-align:center;"><div id="prf-rec-zones"  style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#e8c96a;"></div><div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.12em;color:#8a7fa0;">ZONES</div></div>
+            <div style="text-align:center;"><div id="prf-rec-gold"   style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#e8c96a;"></div><div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.12em;color:#8a7fa0;">GOLD</div></div>
+          </div>
+        </div>
+        <div id="prf-corruption-glow" style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:14px;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7fa0;margin-bottom:10px;">Corruption</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div id="prf-corr-icon" style="font-size:36px;"></div>
+            <div><div id="prf-corr-rank" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;margin-bottom:2px;"></div><div id="prf-corr-tier" style="font-family:'Cinzel',serif;font-size:9px;color:#8a7fa0;margin-bottom:2px;"></div><div id="prf-corr-bosses" style="font-family:'Cinzel',serif;font-size:9px;color:#8a7fa0;"></div></div>
+          </div>
+          <div id="prf-corr-bar" style="display:flex;gap:3px;margin-bottom:8px;"></div>
+          <div id="prf-corr-next" style="font-family:'Crimson Text',serif;font-style:italic;font-size:12px;color:#8a7fa0;"></div>
+        </div>
+        <div id="prf-avatar-ring" style="--ring-color:#c9a84c;">
+          <button id="prf-avatar-btn" style="width:100%;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.15em;color:#8a7fa0;cursor:pointer;margin-bottom:8px;">Change Avatar</button>
+          <div id="prf-avatar-picker" style="display:none;background:rgba(14,11,22,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:14px;"><div id="prf-avatar-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;"></div></div>
+        </div>
+        <div style="background:rgba(14,11,22,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:20px;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7fa0;margin-bottom:10px;">Zone Progress</div>
+          <div id="prf-zones-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY LOGIN -->
+    <div class="page" id="page-daily-login">
+      <div class="page-title">🎁 Daily Rewards</div>
+      <div class="daily-yin-section">
+        <img class="yin-img" src="assets/citycenter/npcs/npc-yin.jpg" alt="Yin" onerror="this.style.opacity='0.3'"/>
+        <div class="yin-greeting">Welcome back! 🙂</div>
+      </div>
+      <div class="daily-streak-info" id="daily-streak"></div>
+      <div class="daily-grid" id="daily-grid"></div>
+    </div>
+
+    <!-- MAP -->
+    <div class="page" id="page-map">
+      <div class="map-header">
+        <div class="map-title">🗺️ World Map</div>
+        <div class="map-sub">Travel to any unlocked zone</div>
+      </div>
+      <div class="zone-list" id="zone-list"></div>
+    </div>
+
+    <!-- SPECIAL MISSIONS -->
+    <div class="page" id="page-special-missions">
+      <div class="page-title">📋 Special Missions</div>
+      <div class="sm-npc-list" id="sm-npc-list"></div>
+      <div id="sm-mission-overlay" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column;overflow-y:auto;">
+        <div class="sm-m-header" style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <button id="sm-mission-back" style="font-size:22px;color:#8a7fa0;background:none;border:none;cursor:pointer;">‹</button>
+          <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;flex:1;">Mission</div>
+        </div>
+        <div class="sm-m-npc-top">
+          <img id="sm-m-npc-img" src="" alt="NPC" onerror="this.style.opacity='0.3'"/>
+          <div><div id="sm-m-npc-name"></div><div id="sm-m-npc-dial"></div></div>
+        </div>
+        <div id="sm-m-quest-list"></div>
+      </div>
+    </div>
+
+    <!-- APARTMENT -->
+    <div class="page" id="page-apartment">
+      <div id="apt-content"></div>
+      <div id="vault-overlay" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column;">
+        <div class="vault-header"><div class="vault-title">🗄️ Vault</div><span id="vault-capacity"></span><button id="vault-close" style="font-size:22px;color:#8a7fa0;background:none;border:none;cursor:pointer;">✕</button></div>
+        <div id="vault-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px;overflow-y:auto;flex:1;"></div>
+      </div>
+      <div id="studio-overlay" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column;overflow-y:auto;">
+        <div class="studio-header"><div class="studio-title">🎵 Studio</div><button id="studio-close" style="font-size:22px;color:#8a7fa0;background:none;border:none;cursor:pointer;">✕</button></div>
+        <div id="studio-npc" class="studio-npc-section"></div>
+        <div id="studio-npc-opts"></div>
+        <div class="studio-tracks-title">Tracks</div>
+        <div id="studio-tracks"></div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="page" id="page-leaderboard">
+      <div class="page-title">🏆 Leaderboard</div>
+      <div class="lb-cats" id="lb-cats"></div>
+      <div id="lb-list"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-title">⚙️ Settings</div>
+      <div id="settings-content"></div>
+    </div>
+
+    <!-- MAIL -->
+    <div class="page" id="page-mail">
+      <div class="mail-header"><div class="mail-title">✉️ Mail</div></div>
+      <div id="mail-inbox"></div>
+      <div id="mail-conversation" style="display:none;flex-direction:column;position:absolute;inset:0;background:var(--bg);">
+        <div class="conv-header" style="display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <button id="conv-back" style="font-size:22px;color:#8a7fa0;background:none;border:none;cursor:pointer;margin-right:8px;">‹</button>
+          <div id="conv-title" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:#e8c96a;flex:1;">Conversation</div>
+        </div>
+        <div id="conv-messages" style="flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:10px;"></div>
+        <div class="conv-input-row" style="display:flex;gap:8px;padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,0.06);">
+          <input id="conv-input" type="text" placeholder="Type a message..." style="flex:1;padding:11px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:24px;font-family:'Crimson Text',serif;font-size:14px;color:#ede0cc;outline:none;"/>
+          <button class="conv-send-btn" onclick="sendMail()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GUILDS — fully rendered by guilds.js -->
+    <div class="page" id="page-guilds"></div>
+
+    <!-- SKILL TREE — fully rendered by skilltree.js -->
+    <div class="page" id="page-skill-tree"></div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <div class="nav-row">
+      <button class="nav-btn" data-page="daily-login"><span class="nav-icon">🎁</span><span class="nav-label">Rewards</span></button>
+      <button class="nav-btn" data-page="city-center"><span class="nav-icon">🏪</span><span class="nav-label">City Center</span></button>
+      <button class="nav-btn" data-page="verya-net"><span class="nav-icon">🌐</span><span class="nav-label">Verya Net</span></button>
+      <button class="nav-btn" data-page="chirp"><span class="nav-icon">💬</span><span class="nav-label">Chirp</span></button>
+      <button class="nav-btn" data-page="craft"><span class="nav-icon">⚒️</span><span class="nav-label">Craft</span></button>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" data-page="characters"><span class="nav-icon">👤</span><span class="nav-label">Characters</span></button>
+      <button class="nav-btn" data-page="inventory"><span class="nav-icon">🎒</span><span class="nav-label">Inventory</span></button>
+      <button class="nav-btn" data-page="quests"><span class="nav-icon">📜</span><span class="nav-label">Quests</span></button>
+      <button class="nav-btn" data-page="social"><span class="nav-icon">🤝</span><span class="nav-label">Social</span></button>
+      <button class="nav-btn" data-page="profile"><span class="nav-icon">🧝</span><span class="nav-label">Profile</span></button>
+    </div>
+  </nav>
+
+</div>
+
+<!-- HAMBURGER MENU — includes Home button -->
+<div id="hamburger-menu">
+  <div class="hm-panel">
+    <button id="hamburger-close" class="hm-close">✕</button>
+    <div class="hm-item" onclick="goToPage('home');document.getElementById('hamburger-menu').classList.remove('open')"><span>🏠</span> Home</div>
+    <div class="hm-item" onclick="goToPage('leaderboard');document.getElementById('hamburger-menu').classList.remove('open')"><span>🏆</span> Leaderboard</div>
+    <div class="hm-item" onclick="goToPage('guilds');document.getElementById('hamburger-menu').classList.remove('open')"><span>🏛️</span> Guilds</div>
+    <div class="hm-item" onclick="goToPage('skill-tree');document.getElementById('hamburger-menu').classList.remove('open')"><span>🌳</span> Skill Tree</div>
+    <div class="hm-item" onclick="goToPage('settings');document.getElementById('hamburger-menu').classList.remove('open')"><span>⚙️</span> Settings</div>
+    <div class="hm-item hm-danger" onclick="doLogout()"><span>🚪</span> Log Out</div>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div id="notif-panel">
+  <div class="notif-header">Notifications</div>
+  <div id="notif-list"><div class="notif-empty">No notifications yet.</div></div>
+</div>
+
+<!-- SHARED MODAL -->
+<div id="modal">
+  <div class="modal-card">
+    <div class="modal-emoji"  id="modal-emoji">❓</div>
+    <div class="modal-title"  id="modal-title">Confirm</div>
+    <div class="modal-desc"   id="modal-desc"></div>
+    <div class="modal-cost"   id="modal-cost" style="display:none"></div>
+    <div class="modal-input-wrap" id="modal-input-wrap" style="display:none">
+      <input class="modal-input" id="modal-input" type="text"/>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel-btn"  id="modal-cancel">Cancel</button>
+      <button class="modal-confirm-btn" id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- PLAYER TAP POPUP -->
+<div id="player-tap-popup" style="display:none">
+  <div class="ptap-card">
+    <div class="ptap-name" id="ptap-name">Player</div>
+    <div class="ptap-btns">
+      <button id="ptap-view">👁 View Profile</button>
+      <button id="ptap-block">🚫 Block</button>
+      <button id="ptap-report">🚨 Report</button>
+    </div>
+    <button class="ptap-close" id="ptap-close">✕</button>
+  </div>
+</div>
+
+<!-- PVP WARNING -->
+<div id="pvp-warning-modal" style="display:none">
+  <div class="pvp-warn-card">
+    <div class="pvp-warn-title">⚠️ PVP Protection Active</div>
+    <div class="pvp-warn-text">You are under PVP protection until Level 15. If you attack now, your protection will be permanently removed and you may be wanted by the CIA.</div>
+    <div class="pvp-warn-btns">
+      <button onclick="document.getElementById('pvp-warning-modal').style.display='none'">Cancel</button>
+      <button id="pvp-warn-confirm">Attack Anyway</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMBAT OVERLAY -->
+<div id="combat-overlay">
+  <canvas id="combat-canvas"></canvas>
+  <div id="combat-crit-flash"></div>
+  <div class="combat-ui">
+    <div class="combat-topbar">
+      <div id="combat-zone-label">Zone</div>
+      <button id="combat-forfeit-btn">🏳️ Forfeit</button>
+    </div>
+    <div class="combat-enemy-section">
+      <div class="combat-enemy-emoji" id="combat-enemy-emoji">💀</div>
+      <div class="combat-enemy-name"  id="combat-enemy-name">Enemy</div>
+      <div class="combat-enemy-hp-wrap">
+        <div class="combat-enemy-hp-fill" id="combat-enemy-hp-fill" style="width:100%"></div>
+        <div class="combat-enemy-hp-text" id="combat-enemy-hp-text">100/100</div>
+      </div>
+    </div>
+    <div class="combat-log" id="combat-log"></div>
+    <div class="combat-timing-section">
+      <div class="combat-timing-label">Tap the green zone!</div>
+      <div class="combat-timing-bar" id="combat-timing-bar">
+        <div class="timing-red-left"></div><div class="timing-yellow-left"></div>
+        <div class="timing-green"></div>
+        <div class="timing-yellow-right"></div><div class="timing-red-right"></div>
+        <div class="combat-pin" id="combat-pin"></div>
+      </div>
+    </div>
+    <div class="combat-player-bars">
+      <div class="combat-bar-row">
+        <span class="combat-bar-lbl" style="color:#2ecc71">HP</span>
+        <div class="combat-bar-track"><div class="combat-bar-fill hp" id="combat-hp-fill" style="width:100%"></div></div>
+        <span class="combat-bar-val" id="combat-hp-val">100/100</span>
+      </div>
+      <div class="combat-bar-row">
+        <span class="combat-bar-lbl" style="color:#3498db">MP</span>
+        <div class="combat-bar-track"><div class="combat-bar-fill mp" id="combat-mp-fill" style="width:100%"></div></div>
+        <span class="combat-bar-val" id="combat-mp-val">50/50</span>
+      </div>
+    </div>
+    <div class="combat-bottom-row">
+      <div class="combat-ability-slots">
+        <div class="combat-ability-slot empty" id="combat-ability-1"></div>
+        <div class="combat-ability-slot empty" id="combat-ability-2"></div>
+      </div>
+      <button class="combat-skill-btn" id="combat-skill-btn">🔮 Skill</button>
+      <div class="combat-quick-slots">
+        <div class="combat-quick-slot" id="quick-slot-1"></div>
+        <div class="combat-quick-slot" id="quick-slot-2"></div>
+        <div class="combat-quick-slot" id="quick-slot-3"></div>
+      </div>
+    </div>
+  </div>
+  <div id="combat-result">
+    <div id="result-emoji">🏆</div>
+    <div id="result-title" class="result-title">Victory!</div>
+    <div id="result-rewards"></div>
+    <button id="result-btn" class="result-btn">Continue</button>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+
+<script>
+async function doLogout() {
+  try {
+    const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    await signOut(getAuth());
+  } catch(e) {}
+  window.location.href = 'index.html';
+}
+function switchChirpTab(tab, el) {
+  document.querySelectorAll('.chirp-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('chirp-feed-panel').style.display = tab === 'feed' ? '' : 'none';
+  const cp = document.getElementById('chirp-chat-panel');
+  cp.style.display = tab === 'chat' ? 'flex' : 'none';
+  if (tab === 'chat' && window.startGlobalChat) window.startGlobalChat();
+}
+</script>
+
+</body>
+</html>
