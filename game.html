@@ -11,6 +11,17 @@
 
 <!-- ONBOARDING OVERLAY -->
 <div id="onboarding-overlay" style="display:none">
+
+  <!-- Step 0: Welcome screen — shown before onboarding steps -->
+  <div class="ob-step" id="ob-step-welcome" style="display:none;position:relative;">
+    <canvas id="ob-welcome-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+    <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px 28px;text-align:center;width:100%;">
+      <div class="ob-title" style="font-size:32px;">VERYA</div>
+      <div class="ob-sub" style="font-size:16px;line-height:1.6;">You have entered a corrupted world.<br/>Your choices will define you.</div>
+      <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.6);margin:8px 0;">Welcome, <span id="ob-welcome-name" style="color:#e8c96a;"></span></div>
+      <button class="ob-btn" onclick="obBegin()" style="margin-top:16px;font-size:13px;letter-spacing:0.3em;">⚔️ BEGIN YOUR JOURNEY</button>
+    </div>
+  </div>
   <div class="ob-step" id="ob-step-gender" style="display:none">
     <div class="ob-title">Welcome to Verya</div>
     <div class="ob-sub">Who are you?</div>
