@@ -12,7 +12,6 @@ import { showToast, openModal } from '../core/modal.js';
 import { auth, db }             from '../../firebase-config.js';
 import {
   signOut, deleteUser,
-  reauthenticateWithPopup, GoogleAuthProvider,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import {
   doc, deleteDoc,

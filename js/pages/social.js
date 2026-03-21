@@ -5,7 +5,6 @@ import { db }                    from '../../firebase-config.js';
 import { collection, query, where,
          getDocs, limit }         from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { showToast }              from '../core/modal.js';
-import { startMailTo }            from './mail.js';
 
 /* ══════════════════════════════════════
    PLAYER SEARCH
@@ -100,7 +99,7 @@ function renderPlayerProfile(uid, p) {
   }
 
   /* Action buttons */
-  document.getElementById('pp-mail-btn').onclick  = () => { modal.classList.remove('open'); startMailTo(uid, p.heroName); };
+  document.getElementById('pp-mail-btn').onclick  = () => { modal.classList.remove('open'); window.startMailTo && window.startMailTo(uid, p.heroName); };
   document.getElementById('pp-friend-btn').textContent = isFriend ? '✅ Friends' : '+ Add Friend';
   document.getElementById('pp-friend-btn').onclick = async () => {
     if (isFriend) return;

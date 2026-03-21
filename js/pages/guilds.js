@@ -18,7 +18,6 @@ import { collection, doc, getDoc,
          getDocs, orderBy, limit,
          serverTimestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { showToast, openModal }       from '../core/modal.js';
-import { startMailTo }                from './mail.js';
 
 let guildChatUnsub = null;
 
@@ -211,7 +210,7 @@ window.requestJoinGuild = async function(guildId, leaderId, guildName, leaderNam
   const p = window.PLAYER; if (!p) return;
   showToast(`📨 Join request sent to ${leaderName}!`);
   /* Send mail to guild leader */
-  await startMailTo(leaderId, leaderName);
+  if (window.startMailTo) await window.startMailTo(leaderId, leaderName);
   /* Auto-send join request message */
   const { collection: col, addDoc: add, serverTimestamp: sts } =
     await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
