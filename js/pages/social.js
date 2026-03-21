@@ -118,7 +118,6 @@ function renderPlayerProfile(uid, p) {
   modal.classList.add('open');
 }
 
-document.getElementById('pp-close')?.addEventListener('click', () =>
   document.getElementById('player-profile-modal')?.classList.remove('open'));
 
 /* ── PVP initiate ── */
@@ -156,12 +155,20 @@ function startPVPCombat(targetUid, targetPlayer) {
 }
 
 /* ── Event hooks ── */
-document.getElementById('social-search-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter') searchPlayers();
-});
-document.addEventListener('page-change', e => {
   if (e.detail.page === 'social') {
     const el = document.getElementById('social-search-results');
     if (el) el.innerHTML = '';
   }
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('pp-close')?.addEventListener('click', () =>
+
+  document.getElementById('social-search-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchPlayers();
+  });
+  document.addEventListener('page-change', e => {
+
 });

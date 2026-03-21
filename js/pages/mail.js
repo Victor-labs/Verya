@@ -151,10 +151,6 @@ window.addReaction = async function(convId, msgId, emoji) {
   await updateDoc(ref, { [`reactions.${emoji}`]: uids });
 };
 
-document.getElementById('conv-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMail(); }
-});
-document.getElementById('conv-back')?.addEventListener('click', openInbox);
 
 function timeAgo(date) {
   if (!date) return '';
@@ -167,4 +163,14 @@ function timeAgo(date) {
 
 document.addEventListener('page-change', e => {
   if (e.detail.page === 'mail') openInbox();
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('conv-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMail(); }
+  });
+  document.getElementById('conv-back')?.addEventListener('click', openInbox);
+
 });

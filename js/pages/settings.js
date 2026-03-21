@@ -150,57 +150,9 @@ function renderClassPicker() {
 /* ══════════════════════════════════════
    SIGN OUT
 ══════════════════════════════════════ */
-document.getElementById('stg-signout-btn').addEventListener('click', () => {
-  openModal({
-    emoji: '👋',
-    title: 'Sign Out',
-    desc:  'Your progress is saved. You can sign back in anytime.',
-    cost:  null,
-    confirmLabel: 'Sign Out',
-    onConfirm: async () => {
-      try {
-        await signOut(auth);
-        window.location.href = 'index.html';
-      } catch (e) {
-        showToast('❌ Error signing out.');
-      }
-    },
-  });
-});
-
 /* ══════════════════════════════════════
    DELETE ACCOUNT (Danger Zone)
 ══════════════════════════════════════ */
-document.getElementById('stg-delete-btn').addEventListener('click', () => {
-  openModal({
-    emoji: '💀',
-    title: 'Delete Account',
-    desc:  'This permanently deletes your hero and all progress. This cannot be undone.',
-    cost:  '⚠️ Irreversible action',
-    confirmLabel: 'Delete Forever',
-    danger: true,
-    onConfirm: async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      try {
-        /* Delete Firestore player document first */
-        await deleteDoc(doc(db, 'players', user.uid));
-        /* Delete Firebase Auth account */
-        await deleteUser(user);
-        window.location.href = 'index.html';
-      } catch (err) {
-        /* If re-auth required (recent login needed) */
-        if (err.code === 'auth/requires-recent-login') {
-          showToast('🔐 Please sign out and sign in again to delete.');
-        } else {
-          showToast('❌ Could not delete account.');
-          console.error(err);
-        }
-      }
-    },
-  });
-});
-
 /* ══════════════════════════════════════
    EVENT HOOKS
 ══════════════════════════════════════ */
@@ -215,4 +167,59 @@ document.addEventListener('player-ready',   () => renderSettings());
 document.addEventListener('player-updated', () => {
   const pg = document.getElementById('page-settings');
   if (pg?.classList.contains('active')) renderSettings();
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('stg-signout-btn').addEventListener('click', () => {
+    openModal({
+      emoji: '👋',
+      title: 'Sign Out',
+      desc:  'Your progress is saved. You can sign back in anytime.',
+      cost:  null,
+      confirmLabel: 'Sign Out',
+      onConfirm: async () => {
+        try {
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (e) {
+          showToast('❌ Error signing out.');
+        }
+      },
+    });
+  });
+
+
+  document.getElementById('stg-delete-btn').addEventListener('click', () => {
+    openModal({
+      emoji: '💀',
+      title: 'Delete Account',
+      desc:  'This permanently deletes your hero and all progress. This cannot be undone.',
+      cost:  '⚠️ Irreversible action',
+      confirmLabel: 'Delete Forever',
+      danger: true,
+      onConfirm: async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+          /* Delete Firestore player document first */
+          await deleteDoc(doc(db, 'players', user.uid));
+          /* Delete Firebase Auth account */
+          await deleteUser(user);
+          window.location.href = 'index.html';
+        } catch (err) {
+          /* If re-auth required (recent login needed) */
+          if (err.code === 'auth/requires-recent-login') {
+            showToast('🔐 Please sign out and sign in again to delete.');
+          } else {
+            showToast('❌ Could not delete account.');
+            console.error(err);
+          }
+        }
+      },
+    });
+  });
+
+
 });

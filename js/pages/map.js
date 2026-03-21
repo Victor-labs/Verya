@@ -20,10 +20,6 @@ export function openMap() {
 window.openMap = openMap;
 
 /* ── Close map ── */
-document.getElementById('map-close-btn')?.addEventListener('click', () => {
-  document.getElementById('map-overlay').classList.remove('open');
-});
-
 /* ══════════════════════════════════════
    RENDER FULL MAP
 ══════════════════════════════════════ */
@@ -156,10 +152,6 @@ function openZoneDetail(zone, curZoneId) {
 window.closeZoneDetail = function() {
   document.getElementById('map-detail-overlay').style.display = 'none';
 };
-document.getElementById('map-detail-overlay')?.addEventListener('click', e => {
-  if (e.target === document.getElementById('map-detail-overlay')) closeZoneDetail();
-});
-
 /* ══════════════════════════════════════
    TRAVEL TO ZONE
 ══════════════════════════════════════ */
@@ -181,4 +173,19 @@ document.addEventListener('player-ready', () => {
     exploreBtn.parentNode.replaceChild(nb, exploreBtn);
     nb.addEventListener('click', openMap);
   }
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('map-close-btn')?.addEventListener('click', () => {
+    document.getElementById('map-overlay').classList.remove('open');
+  });
+
+
+  document.getElementById('map-detail-overlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('map-detail-overlay')) closeZoneDetail();
+  });
+
+
 });

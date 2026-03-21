@@ -60,7 +60,6 @@ window.openVnetSection = function(sectionId) {
   overlay.classList.add('open');
 };
 
-document.getElementById('vnet-overlay-back')?.addEventListener('click', () =>
   document.getElementById('vnet-overlay')?.classList.remove('open'));
 
 /* ══════════════════════════════════════
@@ -239,3 +238,10 @@ window.tradeCoins = async function() {
 /* ── Event hooks ── */
 document.addEventListener('page-change', e => { if (e.detail.page === 'verya-net') renderVeryaNet(); });
 document.addEventListener('player-ready',() => renderVeryaNet());
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('vnet-overlay-back')?.addEventListener('click', () =>
+
+});

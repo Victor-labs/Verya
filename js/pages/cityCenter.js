@@ -62,11 +62,6 @@ window.openShop = function(shopId) {
   overlay.classList.add('open');
 };
 
-document.getElementById('shop-overlay-back')?.addEventListener('click', () => {
-  document.getElementById('shop-overlay').classList.remove('open');
-  document.getElementById('npc-dialogue-overlay').classList.remove('open');
-});
-
 /* ── Victor Market ── */
 function renderVictorMarket(el) {
   const { MARKET_ITEMS, getRarity } = window._itemsModule || {};
@@ -204,10 +199,6 @@ window.handleNPCOption = function(npcId, optId) {
   }
 };
 
-document.getElementById('npc-d-back')?.addEventListener('click', () => {
-  document.getElementById('npc-dialogue-overlay').classList.remove('open');
-});
-
 /* ══════════════════════════════════════
    PACHINKO
 ══════════════════════════════════════ */
@@ -267,14 +258,31 @@ function rollPachinko() {
   return { type:'coins', amount: Math.floor(Math.random()*20)+2, emoji:'🪙', label:`${Math.floor(Math.random()*20)+2} Coins` };
 }
 
-document.getElementById('pachinko-close')?.addEventListener('click', () => {
-  document.getElementById('pachinko-overlay')?.classList.remove('open');
-});
-
 /* ── Event hooks ── */
 document.addEventListener('page-change',   e => { if (e.detail.page === 'city-center') renderCityCenter(); });
 document.addEventListener('player-ready',  () => renderCityCenter());
 document.addEventListener('player-updated',() => {
   const pg = document.getElementById('page-city-center');
   if (pg?.classList.contains('active')) renderCityCenter();
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('shop-overlay-back')?.addEventListener('click', () => {
+    document.getElementById('shop-overlay').classList.remove('open');
+    document.getElementById('npc-dialogue-overlay').classList.remove('open');
+  });
+
+
+  document.getElementById('npc-d-back')?.addEventListener('click', () => {
+    document.getElementById('npc-dialogue-overlay').classList.remove('open');
+  });
+
+
+  document.getElementById('pachinko-close')?.addEventListener('click', () => {
+    document.getElementById('pachinko-overlay')?.classList.remove('open');
+  });
+
+
 });

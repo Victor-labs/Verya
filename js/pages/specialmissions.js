@@ -200,10 +200,16 @@ function formatReward(r) {
   return r.type;
 }
 
-document.getElementById('sm-mission-back')?.addEventListener('click', () => {
-  document.getElementById('sm-mission-overlay')?.classList.remove('open');
-});
-
 /* ── Event hooks ── */
 document.addEventListener('page-change',  e => { if (e.detail.page === 'special-missions') renderSpecialMissions(); });
 document.addEventListener('player-ready', () => renderSpecialMissions());
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('sm-mission-back')?.addEventListener('click', () => {
+    document.getElementById('sm-mission-overlay')?.classList.remove('open');
+  });
+
+
+});

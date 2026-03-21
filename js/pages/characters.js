@@ -126,44 +126,8 @@ window.closeCharDetail = function() {
 };
 
 /* Buy character */
-document.getElementById('cd-buy-btn')?.addEventListener('click', () => {
-  const char = getCharacter(selectedCharId); if (!char) return;
-  const p    = window.PLAYER;
-  if ((p.diamonds || 0) < char.price) { showToast('💎 Not enough diamonds!'); return; }
-
-  openModal({
-    emoji: char.img ? '' : '👤',
-    title: `Buy ${char.name}`,
-    desc:  `${char.name} · ${TIER_COLORS[char.tier]?.label}\n💎 ${char.price} Diamonds`,
-    cost:  `💎 ${char.price} Diamonds`,
-    confirmLabel: 'Purchase',
-    onConfirm: async () => {
-      const owned = [...(p.ownedCharacters || []), selectedCharId];
-      await window.updatePlayerField({
-        diamonds:        (p.diamonds || 0) - char.price,
-        ownedCharacters: owned,
-      });
-      showToast(`✅ ${char.name} unlocked!`);
-      renderCharacters();
-      window.openCharDetail(selectedCharId);
-    },
-  });
-});
-
 /* Equip character */
-document.getElementById('cd-equip-btn')?.addEventListener('click', async () => {
-  const char = getCharacter(selectedCharId); if (!char) return;
-  await window.updatePlayerField({ equippedCharacter: selectedCharId });
-  showToast(`✅ ${char.name} equipped as your character!`);
-  renderCharacters();
-  closeCharDetail();
-});
-
 /* Equip ability slot */
-document.getElementById('cd-abil-slot-btn')?.addEventListener('click', () => {
-  openAbilitySlotPicker(selectedCharId);
-});
-
 /* ══════════════════════════════════════
    ABILITY SLOT PICKER
 ══════════════════════════════════════ */
@@ -200,4 +164,48 @@ document.addEventListener('player-ready',  () => renderCharacters());
 document.addEventListener('player-updated',() => {
   const pg = document.getElementById('page-characters');
   if (pg?.classList.contains('active')) renderCharacters();
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('cd-buy-btn')?.addEventListener('click', () => {
+    const char = getCharacter(selectedCharId); if (!char) return;
+    const p    = window.PLAYER;
+    if ((p.diamonds || 0) < char.price) { showToast('💎 Not enough diamonds!'); return; }
+
+    openModal({
+      emoji: char.img ? '' : '👤',
+      title: `Buy ${char.name}`,
+      desc:  `${char.name} · ${TIER_COLORS[char.tier]?.label}\n💎 ${char.price} Diamonds`,
+      cost:  `💎 ${char.price} Diamonds`,
+      confirmLabel: 'Purchase',
+      onConfirm: async () => {
+        const owned = [...(p.ownedCharacters || []), selectedCharId];
+        await window.updatePlayerField({
+          diamonds:        (p.diamonds || 0) - char.price,
+          ownedCharacters: owned,
+        });
+        showToast(`✅ ${char.name} unlocked!`);
+        renderCharacters();
+        window.openCharDetail(selectedCharId);
+      },
+    });
+  });
+
+
+  document.getElementById('cd-equip-btn')?.addEventListener('click', async () => {
+    const char = getCharacter(selectedCharId); if (!char) return;
+    await window.updatePlayerField({ equippedCharacter: selectedCharId });
+    showToast(`✅ ${char.name} equipped as your character!`);
+    renderCharacters();
+    closeCharDetail();
+  });
+
+
+  document.getElementById('cd-abil-slot-btn')?.addEventListener('click', () => {
+    openAbilitySlotPicker(selectedCharId);
+  });
+
+
 });

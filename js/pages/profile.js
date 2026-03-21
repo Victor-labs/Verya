@@ -139,15 +139,21 @@ window.selectAvatar = function(av) {
   showToast(`${av} Avatar updated!`);
 };
 
-document.getElementById('prf-avatar-btn').addEventListener('click', () => {
-  const picker = document.getElementById('prf-avatar-picker');
-  picker.style.display = picker.style.display === 'none' ? '' : 'none';
-});
-
 /* ── Event hooks ── */
 document.addEventListener('page-change',    e => { if (e.detail.page === 'profile') renderProfile(); });
 document.addEventListener('player-ready',   () => { /* Profile renders when page-change fires */ });
 document.addEventListener('player-updated', () => {
   const pg = document.getElementById('page-profile');
   if (pg?.classList.contains('active')) renderProfile();
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('prf-avatar-btn').addEventListener('click', () => {
+    const picker = document.getElementById('prf-avatar-picker');
+    picker.style.display = picker.style.display === 'none' ? '' : 'none';
+  });
+
+
 });

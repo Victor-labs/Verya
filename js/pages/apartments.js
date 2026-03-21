@@ -196,7 +196,6 @@ window.withdrawVaultItem = async function(idx) {
   renderVault();
 };
 
-document.getElementById('vault-close')?.addEventListener('click', () =>
   document.getElementById('vault-overlay')?.classList.remove('open'));
 
 /* ══════════════════════════════════════
@@ -308,7 +307,6 @@ function renderStudioClosed() {
   if (tracksEl) tracksEl.style.display = 'none';
 }
 
-document.getElementById('studio-close')?.addEventListener('click', () =>
   document.getElementById('studio-overlay')?.classList.remove('open'));
 
 /* ── Weekly rent check ── */
@@ -342,3 +340,12 @@ window.checkWeeklyRent = checkWeeklyRent;
 /* ── Event hooks ── */
 document.addEventListener('page-change',  e => { if (e.detail.page === 'apartment') renderApartments(); });
 document.addEventListener('player-ready', () => { renderApartments(); checkWeeklyRent(); });
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('vault-close')?.addEventListener('click', () =>
+
+  document.getElementById('studio-close')?.addEventListener('click', () =>
+
+});

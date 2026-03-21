@@ -135,10 +135,6 @@ window.sendChatMsg = async function() {
 };
 
 /* Send on Enter key */
-document.getElementById('chat-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMsg(); }
-});
-
 /* ── Tap player name anywhere → block/report popup ── */
 window.tapPlayerName = function(uid, name) {
   if (!uid || uid === window.PLAYER_UID) return;
@@ -149,23 +145,10 @@ window.tapPlayerName = function(uid, name) {
   document.getElementById('ptap-name').textContent = name;
   popup.style.display = 'flex';
 };
-document.getElementById('ptap-close')?.addEventListener('click', () => {
-  document.getElementById('player-tap-popup').style.display = 'none';
-});
-document.getElementById('ptap-view')?.addEventListener('click', () => {
   const uid = document.getElementById('player-tap-popup').dataset.uid;
   document.getElementById('player-tap-popup').style.display = 'none';
   viewPlayerProfile(uid);
 });
-document.getElementById('ptap-block')?.addEventListener('click', async () => {
-  const uid  = document.getElementById('player-tap-popup').dataset.uid;
-  const name = document.getElementById('player-tap-popup').dataset.name;
-  const p    = window.PLAYER;
-  await window.updatePlayerField({ blockedUsers: [...(p.blockedUsers||[]), uid] });
-  document.getElementById('player-tap-popup').style.display = 'none';
-  showToast(`🚫 ${name} blocked.`);
-});
-document.getElementById('ptap-report')?.addEventListener('click', async () => {
   const uid  = document.getElementById('player-tap-popup').dataset.uid;
   const name = document.getElementById('player-tap-popup').dataset.name;
   document.getElementById('player-tap-popup').style.display = 'none';
@@ -195,4 +178,29 @@ document.addEventListener('page-change', e => {
     chirpTab = 'feed';
     switchChirpTab('feed');
   }
+});
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('chat-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMsg(); }
+  });
+
+
+  document.getElementById('ptap-close')?.addEventListener('click', () => {
+    document.getElementById('player-tap-popup').style.display = 'none';
+  });
+  document.getElementById('ptap-view')?.addEventListener('click', () => {
+
+  document.getElementById('ptap-block')?.addEventListener('click', async () => {
+    const uid  = document.getElementById('player-tap-popup').dataset.uid;
+    const name = document.getElementById('player-tap-popup').dataset.name;
+    const p    = window.PLAYER;
+    await window.updatePlayerField({ blockedUsers: [...(p.blockedUsers||[]), uid] });
+    document.getElementById('player-tap-popup').style.display = 'none';
+    showToast(`🚫 ${name} blocked.`);
+  });
+  document.getElementById('ptap-report')?.addEventListener('click', async () => {
+
 });

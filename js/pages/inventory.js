@@ -196,67 +196,10 @@ window.openItemDetail = function(itemId, source) {
 };
 
 /* Close */
-document.getElementById('inv-modal-close')?.addEventListener('click', () =>
   document.getElementById('inv-modal').style.display = 'none');
-document.getElementById('inv-modal')?.addEventListener('click', e => {
-  if (e.target === document.getElementById('inv-modal'))
-    document.getElementById('inv-modal').style.display = 'none';
-});
-
 /* Equip */
-document.getElementById('inv-modal-equip-btn')?.addEventListener('click', () => {
-  if (!selectedItem) return;
-  const { def } = selectedItem;
-  const p = window.PLAYER; if (!p) return;
-  if (!canEquip(def, getEquipped())) {
-    showToast('⚠️ Unequip conflicting item first'); return;
-  }
-  const eq = { ...getEquipped(), [def.slot]: def.id };
-  window.updatePlayerField({ equipped: eq });
-  document.getElementById('inv-modal').style.display = 'none';
-  showToast(`${def.rarity === 'legendary' ? '🟡' : def.rarity === 'evil' ? '🔴' : '✅'} ${def.name} equipped!`);
-  renderEquipSlots(); renderBagGrid();
-});
-
 /* Unequip */
-document.getElementById('inv-modal-unequip-btn')?.addEventListener('click', () => {
-  if (!selectedItem) return;
-  const { def } = selectedItem;
-  const eq = { ...getEquipped() };
-  delete eq[def.slot];
-  window.updatePlayerField({ equipped: eq });
-  document.getElementById('inv-modal').style.display = 'none';
-  showToast(`${def.name} unequipped.`);
-  renderEquipSlots(); renderBagGrid();
-});
-
 /* Use consumable */
-document.getElementById('inv-modal-use-btn')?.addEventListener('click', () => {
-  if (!selectedItem) return;
-  const { def } = selectedItem;
-  const p = window.PLAYER; if (!p) return;
-  const inv = getInventory().slice();
-  const idx = inv.findIndex(i => i.id === def.id);
-  if (idx < 0) return;
-
-  const updates = {};
-  const effect  = def.effect || '';
-  const num     = parseInt(effect.replace(/\D/g,'')) || 10;
-
-  if      (effect.toLowerCase().includes('hp'))     { updates.hp     = Math.min((p.hp||100)+num, p.maxHp||100); showToast(`❤️ +${num} HP!`); }
-  else if (effect.toLowerCase().includes('mp'))     { updates.mp     = Math.min((p.mp||50) +num, p.maxMp||50);  showToast(`💙 +${num} MP!`); }
-  else if (effect.toLowerCase().includes('agility')){ showToast(`💨 Agility boosted!`); }
-  else                                               { showToast(`✨ Used ${def.name}!`); }
-
-  inv[idx] = { id: def.id, uses: inv[idx].uses - 1 };
-  if (inv[idx].uses <= 0) inv.splice(idx, 1);
-  updates.inventory = inv;
-
-  window.updatePlayerField(updates);
-  document.getElementById('inv-modal').style.display = 'none';
-  renderBagGrid();
-});
-
 /* ══════════════════════════════════════
    SLOT PICKER DRAWER
    Opens when tapping an empty equip slot
@@ -312,13 +255,7 @@ window.pickAndEquip = function(itemId) {
   renderEquipSlots(); renderBagGrid();
 };
 
-document.getElementById('inv-picker-close')?.addEventListener('click', () =>
   document.getElementById('inv-slot-picker').style.display = 'none');
-document.getElementById('inv-slot-picker')?.addEventListener('click', e => {
-  if (e.target === document.getElementById('inv-slot-picker'))
-    document.getElementById('inv-slot-picker').style.display = 'none';
-});
-
 /* ── Event hooks ── */
 document.addEventListener('page-change', e => {
   if (e.detail.page === 'inventory') {
@@ -330,3 +267,78 @@ document.addEventListener('page-change', e => {
 });
 document.addEventListener('player-ready',   () => { renderEquipSlots(); renderBagGrid(); });
 document.addEventListener('player-updated', () => { renderEquipSlots(); renderBagGrid(); });
+
+
+/* ── Attach DOM listeners after page load ── */
+window.addEventListener('load', () => {
+  document.getElementById('inv-modal-close')?.addEventListener('click', () =>
+
+  document.getElementById('inv-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('inv-modal'))
+      document.getElementById('inv-modal').style.display = 'none';
+  });
+
+
+  document.getElementById('inv-modal-equip-btn')?.addEventListener('click', () => {
+    if (!selectedItem) return;
+    const { def } = selectedItem;
+    const p = window.PLAYER; if (!p) return;
+    if (!canEquip(def, getEquipped())) {
+      showToast('⚠️ Unequip conflicting item first'); return;
+    }
+    const eq = { ...getEquipped(), [def.slot]: def.id };
+    window.updatePlayerField({ equipped: eq });
+    document.getElementById('inv-modal').style.display = 'none';
+    showToast(`${def.rarity === 'legendary' ? '🟡' : def.rarity === 'evil' ? '🔴' : '✅'} ${def.name} equipped!`);
+    renderEquipSlots(); renderBagGrid();
+  });
+
+
+  document.getElementById('inv-modal-unequip-btn')?.addEventListener('click', () => {
+    if (!selectedItem) return;
+    const { def } = selectedItem;
+    const eq = { ...getEquipped() };
+    delete eq[def.slot];
+    window.updatePlayerField({ equipped: eq });
+    document.getElementById('inv-modal').style.display = 'none';
+    showToast(`${def.name} unequipped.`);
+    renderEquipSlots(); renderBagGrid();
+  });
+
+
+  document.getElementById('inv-modal-use-btn')?.addEventListener('click', () => {
+    if (!selectedItem) return;
+    const { def } = selectedItem;
+    const p = window.PLAYER; if (!p) return;
+    const inv = getInventory().slice();
+    const idx = inv.findIndex(i => i.id === def.id);
+    if (idx < 0) return;
+
+    const updates = {};
+    const effect  = def.effect || '';
+    const num     = parseInt(effect.replace(/\D/g,'')) || 10;
+
+    if      (effect.toLowerCase().includes('hp'))     { updates.hp     = Math.min((p.hp||100)+num, p.maxHp||100); showToast(`❤️ +${num} HP!`); }
+    else if (effect.toLowerCase().includes('mp'))     { updates.mp     = Math.min((p.mp||50) +num, p.maxMp||50);  showToast(`💙 +${num} MP!`); }
+    else if (effect.toLowerCase().includes('agility')){ showToast(`💨 Agility boosted!`); }
+    else                                               { showToast(`✨ Used ${def.name}!`); }
+
+    inv[idx] = { id: def.id, uses: inv[idx].uses - 1 };
+    if (inv[idx].uses <= 0) inv.splice(idx, 1);
+    updates.inventory = inv;
+
+    window.updatePlayerField(updates);
+    document.getElementById('inv-modal').style.display = 'none';
+    renderBagGrid();
+  });
+
+
+  document.getElementById('inv-picker-close')?.addEventListener('click', () =>
+
+  document.getElementById('inv-slot-picker')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('inv-slot-picker'))
+      document.getElementById('inv-slot-picker').style.display = 'none';
+  });
+
+
+});
