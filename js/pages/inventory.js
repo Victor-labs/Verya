@@ -196,7 +196,9 @@ window.openItemDetail = function(itemId, source) {
 };
 
 /* Close */
-  document.getElementById('inv-modal').style.display = 'none');
+  document.getElementById('inv-modal-close')?.addEventListener('click', () => {
+    document.getElementById('inv-modal').style.display = 'none';
+  });
 /* Equip */
 /* Unequip */
 /* Use consumable */
@@ -255,7 +257,9 @@ window.pickAndEquip = function(itemId) {
   renderEquipSlots(); renderBagGrid();
 };
 
-  document.getElementById('inv-slot-picker').style.display = 'none');
+  document.getElementById('inv-picker-close')?.addEventListener('click', () => {
+    document.getElementById('inv-slot-picker').style.display = 'none';
+  });
 /* ── Event hooks ── */
 document.addEventListener('page-change', e => {
   if (e.detail.page === 'inventory') {
